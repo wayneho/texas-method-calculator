@@ -1,0 +1,29 @@
+<form class="form-horizontal" ng-Submit="updateFactory()">
+    <div class="form-group">
+        <label for="squatInput" class="col-sm-3 control-label">Squat</label>
+        <div class="col-sm-7">
+            <input required type="text" class="form-control text-center" id="squatInput" ng-model="squat"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="benchInput" class="col-sm-3 control-label">Bench Press</label>
+        <div class="col-sm-7">
+            <input required type="text" class="form-control text-center" id="benchInput" ng-model="bench"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="deadliftInput" class="col-sm-3 control-label">Deadlift</label>
+        <div class="col-sm-7">
+            <input required type="text" class="form-control text-center" id="deadliftInput" ng-model="deadlift"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="ohpInput" class="col-sm-3 control-label">Overhead Press</label>
+        <div class="col-sm-7">
+            <input required type="text"  class="form-control text-center" id="ohpInput" ng-model="ohp"/>
+        </div>
+    </div>
+    <div class="col-sm-7 col-sm-offset-3">
+        <button type="submit" class="btn btn-primary">Generate Template</button>
+    </div>
+</form>

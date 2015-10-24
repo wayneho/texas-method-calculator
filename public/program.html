@@ -1,0 +1,34 @@
+<table class="table table-striped table-condensed" ng-repeat="day in program">
+    <caption>{{day.name}}</caption>
+    <thead>
+        <tr>
+            <th class="col-sm-3">Exercise</th>
+            <th class="col-sm-3">Reps</th>
+            <th class="col-sm-3">Weight(lbs)</th>
+            <th class="col-sm-3">Difficulty</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="exercise in day.workout" >
+            <td>{{exercise.name}}</td>
+            <td>{{exercise.reps}}</td>
+            <td>{{exercise.weight}}</td>
+            <td uib-dropdown ng-show="exercise.difficulty">
+                <button id="single-button" type="button" class="btn btn-sm btn-primary" uib-dropdown-toggle>
+                    {{exercise.difficulty}} <span class="caret"></span>
+                </button>
+                <ul class="uib-dropdown-menu" role="menu">
+                    <li role="menuitem" ng-click="exercise.difficulty = 'Easy'"><a href="">Easy</a></li>
+                    <li role="menuitem" ng-click="exercise.difficulty = 'Medium'"><a href="">Medium</a></li>
+                    <li role="menuitem" ng-click="exercise.difficulty = 'Hard'"><a href="">Hard</a></li>
+                    <li role="menuitem" ng-click="exercise.difficulty = 'Failed'"><a href="">Failed</a></li>
+                </ul>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+
+

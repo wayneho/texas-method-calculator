@@ -1,47 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="TMCalc">
   <head>
-    <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bower_components/angular-motion/dist/angular-motion.min.css">
+    <title><%= title %></title>
   </head>
-  <body ng-app="TMCalc">
-    <div id="main" class="container" ng-controller="mainController">
+  <body>
+    <div id="main" class="container">
       <div class="col-md-8 col-md-offset-2">
-        <h1><%= title %></h1>
-        <form class="form-horizontal" ng-Submit="generate()">
-          <div class="form-group">
-            <label for="squatInput" class="col-sm-3 control-label">Squat</label>
-            <div class="col-sm-7">
-              <input required type="text" class="form-control text-center" id="squatInput" ng-model="mainLifts.squat"/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="benchInput" class="col-sm-3 control-label">Bench Press</label>
-            <div class="col-sm-7">
-              <input required type="text" class="form-control text-center" id="benchInput" ng-model="mainLifts.bench"/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="deadliftInput" class="col-sm-3 control-label">Deadlift</label>
-            <div class="col-sm-7">
-              <input required type="text" class="form-control text-center" id="deadliftInput" ng-model="mainLifts.deadlift"/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="ohpInput" class="col-sm-3 control-label">Overhead Press</label>
-            <div class="col-sm-7">
-              <input required type="text" class="form-control text-center" id="ohpInput" ng-model="mainLifts.ohp"/>
-            </div>
-          </div>
-          <div class="col-sm-7 col-sm-offset-3">
-            <button type="submit" class="btn btn-default">Generate Program</button>
-          </div>
-
-        </form>
+        <h1>Texas Method</h1>
+        <div ng-view>
+        </div>
       </div>
     </div>
+
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.7/angular-animate.min.js"></script>
+    <script src="/bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+    <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
     <script src="javascripts/TMCalc.js"></script>
   </body>
 </html>
