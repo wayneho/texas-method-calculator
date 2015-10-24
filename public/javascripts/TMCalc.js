@@ -105,13 +105,23 @@ app.controller('week-one',['$scope','liftFactory', function($scope,liftFactory){
             name: "Intensity Day",
             workout: intensityDay
         }
-    ]
+    ];
 
-    $scope.toggleDropdown = function($event) {
-        $event.preventDefault();
-        $event.stopPropagation();
-        $scope.status.isopen = !$scope.status.isopen;
+    $scope.appliedClass = function(difficulty){
+        switch(difficulty){
+            case "Easy":
+                return "btn-success";
+            case "Medium":
+                return "btn-info";
+            case "Hard":
+                return "btn-warning";
+            case "Failed":
+                return "btn-danger";
+            default:
+                return "btn-primary";
+        }
     };
+
 }]);
 
 app.factory('liftFactory',function(){
@@ -126,7 +136,7 @@ app.factory('liftFactory',function(){
         bench = b;
         deadlift = d;
         ohp = o;
-    };
+    }
 
     function getData(){
         return {
@@ -135,7 +145,7 @@ app.factory('liftFactory',function(){
             deadlift: deadlift,
             ohp: ohp
         };
-    };
+    }
 
     return {
         getData: getData,

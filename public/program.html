@@ -14,19 +14,27 @@
             <td>{{exercise.reps}}</td>
             <td>{{exercise.weight}}</td>
             <td uib-dropdown ng-show="exercise.difficulty">
-                <button id="single-button" type="button" class="btn btn-sm btn-primary" uib-dropdown-toggle>
+                <button class="btn btn-sm" ng-class="appliedClass(exercise.difficulty)" uib-dropdown-toggle>
                     {{exercise.difficulty}} <span class="caret"></span>
                 </button>
-                <ul class="uib-dropdown-menu" role="menu">
-                    <li role="menuitem" ng-click="exercise.difficulty = 'Easy'"><a href="">Easy</a></li>
-                    <li role="menuitem" ng-click="exercise.difficulty = 'Medium'"><a href="">Medium</a></li>
-                    <li role="menuitem" ng-click="exercise.difficulty = 'Hard'"><a href="">Hard</a></li>
-                    <li role="menuitem" ng-click="exercise.difficulty = 'Failed'"><a href="">Failed</a></li>
+                <ul class="uib-dropdown-menu">
+                    <li ng-click="exercise.difficulty = 'Easy'"><a href="">Easy</a></li>
+                    <li ng-click="exercise.difficulty = 'Medium'"><a href="">Medium</a></li>
+                    <li ng-click="exercise.difficulty = 'Hard'"><a href="">Hard</a></li>
+                    <li ng-click="exercise.difficulty = 'Failed'"><a href="">Failed</a></li>
                 </ul>
             </td>
         </tr>
     </tbody>
 </table>
+
+<div class="btn-group">
+    <button class="btn btn-primary">Save</button>
+    <button class="btn btn-primary">Proceed to next week</button>
+</div>
+
+
+
 
 
 
