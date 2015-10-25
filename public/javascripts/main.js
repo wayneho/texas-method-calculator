@@ -23,12 +23,12 @@ myApp.config(function($routeProvider){
         .when('/register',{
             templateUrl: '../partials/register.html',
             controller: 'registerController',
-            access: {restricted: true}
+            access: {restricted: false}
         })
         .when('/week-one',{
             templateUrl: '../partials/program.html',
             controller: 'week-one',
-            access: {restricted: true}
+            access: {restricted: false}
         })
         .otherwise({redirectTo: '/'});
     })

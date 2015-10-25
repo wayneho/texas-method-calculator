@@ -23,7 +23,7 @@ angular.module('myApp')
 
         $scope.lifts = LiftFactory.getData();
 
-        var volumeDay = {
+        $scope.volumeDay = {
             exercise1: {
                 name: "Squat",
                 reps: "5x5",
@@ -43,7 +43,7 @@ angular.module('myApp')
             }
         };
 
-        var lightDay = {
+        $scope.lightDay = {
             exercise1: {
                 name: "Squat",
                 reps: "2x5",
@@ -61,7 +61,7 @@ angular.module('myApp')
             }
         };
 
-        var intensityDay = {
+        $scope.intensityDay = {
             exercise1: {
                 name: "Squat",
                 reps: "1x5",
@@ -85,15 +85,15 @@ angular.module('myApp')
         $scope.program = [
             {
                 name: "Volume Day",
-                workout: volumeDay
+                workout: $scope.volumeDay
             },
             {
                 name: "Light Day",
-                workout: lightDay
+                workout: $scope.lightDay
             },
             {
                 name: "Intensity Day",
-                workout: intensityDay
+                workout: $scope.intensityDay
             }
         ];
 

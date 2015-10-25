@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var router = express.Router();
+var Week = require('../models/week');
 
 router.route('/week')
     //returns every week

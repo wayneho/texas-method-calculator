@@ -3,9 +3,10 @@ var passport = require('passport');
 var Account = require('../models/account');
 var router = express.Router();
 
+
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Texas Method Calculator' });
+  res.render('index', { title: 'Texas Method' });
 });
 
 router.post('/register', function(req, res) {
