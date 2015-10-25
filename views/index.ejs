@@ -1,15 +1,14 @@
 <!DOCTYPE html>
-<html ng-app="TMCalc">
+<html ng-app="myApp">
   <head>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/bower_components/angular-motion/dist/angular-motion.min.css">
     <title><%= title %></title>
   </head>
   <body>
     <div id="main" class="container">
       <div class="col-md-8 col-md-offset-2">
-        <h1>Texas Method</h1>
+        <h1><%= title %></h1>
         <div ng-view>
         </div>
       </div>
@@ -17,9 +16,10 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.7/angular-animate.min.js"></script>
     <script src="/bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
     <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
-    <script src="javascripts/TMCalc.js"></script>
+    <script src="./javascripts/main.js"></script>
+    <script src="./javascripts/controllers.js"></script>
+    <script src="./javascripts/services.js"></script>
   </body>
 </html>
