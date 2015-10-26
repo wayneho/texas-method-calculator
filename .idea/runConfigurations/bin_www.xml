@@ -3,7 +3,7 @@
     <envs>
       <env name="DEBUG" value="texas-method-calculator:*" />
     </envs>
-    <browser name="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" start="true" url="http://localhost:3000/" />
+    <browser name="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" url="http://localhost:3000/" />
     <method />
   </configuration>
 </component>

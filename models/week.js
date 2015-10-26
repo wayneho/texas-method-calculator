@@ -8,7 +8,8 @@ var Schema = mongoose.Schema;
 var Week = new Schema({
     weekNumber: String,
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'Account'},
-    completedDate: {type: Date, default: Date.now},
+    startDate: {type: Date, default: Date.now},
+    complete: Boolean,
     volumeDay: {
         squat: {
             weight: String,
@@ -28,11 +29,11 @@ var Week = new Schema({
             weight: String,
             difficulty: String
         },
-        press: {
+        benchPress: {
             weight: String,
             difficulty: String
         },
-        bench: {
+        deadlift: {
             weight: String,
             difficulty: String
         },
