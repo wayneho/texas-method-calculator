@@ -23,7 +23,7 @@ function isAuthenticated (req, res, next) {
     return res.redirect('/#/login');
 }
 
-router.use('/', isAuthenticated);
+//router.use('/', isAuthenticated);
 
 //Query database for username and return the user's id
 var findUserIdByUsername = function(username, callback){
@@ -43,6 +43,7 @@ var findWeekNumOfUser = function(weekNum, userId, callback){
     });
 };
 
+//find user id if username is present in the route path
 router.param('username',function(req, res, next, username){
     console.log('username param was detected: ' + username);
     findUserIdByUsername(username,function(err,userId){
@@ -51,7 +52,7 @@ router.param('username',function(req, res, next, username){
         return next();
     })
 });
-
+//find the specified week of the user
 router.param('weekNum',function(req, res, next, weekNum){
     console.log('weekNum param was detected: ' + weekNum);
     findWeekNumOfUser(weekNum,req.userId,function(err,week){
@@ -64,12 +65,24 @@ router.param('weekNum',function(req, res, next, weekNum){
 router.route('/:username/:weekNum')
     //returns a particular week
     .get(function(req, res, next){
-        res.json(req.weekNum);
+        res.json(req.weekNum[0]);
     })
-    //update existing week
+    //update specified week
     .put(function(req, res){
-        res.send({message: 'TODO modify a week with ID ' + req.params.username+' with ID ' + req.params.id});
+        var properties = {};
+        for(var prop in req.body){
+            if(req.body.hasOwnProperty(prop))
+                properties[prop] = req.body[prop]
+        }
+        console.log(properties);
+
+        Week.update({_id: req.weekNum[0]._id}, {$set: properties}, function(err){
+            if(err) return res.send(500, err);
+            return res.json({message: "Properties: updated successfully"});
+        });
+
     })
+    //create a new week for the user
     .post(function(req,res, next){
         var week = new Week;
         week.user = req.userId;
@@ -78,15 +91,17 @@ router.route('/:username/:weekNum')
         week.volumeDay = req.body.volumeDay;
         week.intensityDay = req.body.intensityDay;
         week.save(function(err,week){
-            if(err){
-                return res.send(500, err);
-            }
+            if(err) return res.send(500, err);
+
             return res.json(week);
         });
     })
-    //delete existing post
+    //delete existing week
     .delete(function(req, res){
-        res.send({message: 'TODO delete a week with ID ' + req.params.username+' with ID ' + req.params.id});
+        Week.remove({_id: req.weekNum[0]._id}, function(err){
+            if(err) return res.send(500, err);
+            res.json("deleted:(");
+        });
     });
 
 
