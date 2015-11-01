@@ -6,39 +6,50 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Week = new Schema({
-    weekNumber: String,
+    weekNumber: Number,
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'Account'},
     startDate: {type: Date, default: Date.now},
-    complete: Boolean,
+    completed: {type: Boolean, default: false},
     volumeDay: {
         squat: {
-            weight: String,
+            weight: Number,
             difficulty: String
         },
         benchPress: {
-            weight: String,
+            weight: Number,
             difficulty: String
         },
         overheadPress: {
-            weight: String,
+            weight: Number,
             difficulty: String
+        }
+    },
+    lightDay:{
+        squat: {
+            weight: Number
+        },
+        benchPress: {
+            weight: Number
+        },
+        overheadPress: {
+            weight: Number
         }
     },
     intensityDay: {
         squat: {
-            weight: String,
+            weight: Number,
             difficulty: String
         },
         benchPress: {
-            weight: String,
+            weight: Number,
             difficulty: String
         },
         deadlift: {
-            weight: String,
+            weight: Number,
             difficulty: String
         },
         overheadPress: {
-            weight: String,
+            weight: Number,
             difficulty: String
         }
     }

@@ -3,6 +3,12 @@
  */
 
 angular.module('myApp')
+    .run(function($rootScope){
+        $rootScope.authenticated = false;
+        $rootScope.current_user = "";
+        $rootScope.current_week = 0;
+    })
+
     .controller('mainController',
     ['$scope','$location','LiftFactory',
     function($scope,$location,LiftFactory){
@@ -11,15 +17,14 @@ angular.module('myApp')
         $scope.deadlift = 200;
         $scope.ohp = 200;
 
-        $scope.updateFactory = function(){
+        $scope.updateData = function(){
             LiftFactory.setData($scope.squat,$scope.squat,$scope.deadlift,$scope.ohp);
             $location.path('/week-one');
         };
     }])
 
-    .controller('week-one',
-    ['$scope','LiftFactory',
-    function($scope,LiftFactory){
+    .controller('week-one',['$scope','LiftFactory','$rootScope','WeekFactory',
+    function($scope,LiftFactory, $rootScope, WeekFactory){
 
         $scope.lifts = LiftFactory.getData();
 
@@ -28,13 +33,13 @@ angular.module('myApp')
                 name: "Squat",
                 reps: "5x5",
                 weight: $scope.lifts.squat * 0.9,
-                difficulty: "Difficulty"
+                difficulty: "-"
             },
             exercise2: {
                 name: "Bench Press",
                 reps: "5x5",
                 weight: $scope.lifts.bench * 0.9,
-                difficulty: "Difficulty"
+                difficulty: "-"
             },
             exercise3: {
                 name: "Accessory",
@@ -66,19 +71,19 @@ angular.module('myApp')
                 name: "Squat",
                 reps: "1x5",
                 weight: parseInt($scope.lifts.squat)+5,
-                difficulty: "Difficulty"
+                difficulty: "-"
             },
             exercise2: {
                 name: "Bench Press",
                 reps: "1x5",
                 weight: parseInt($scope.lifts.bench)+5,
-                difficulty: "Difficulty"
+                difficulty: "-"
             },
             exercise3: {
                 name: "Deadlift",
                 reps: "1x5",
                 weight: parseInt($scope.lifts.deadlift)+5,
-                difficulty: "Difficulty"
+                difficulty: "-"
             }
         };
 
@@ -99,11 +104,15 @@ angular.module('myApp')
 
         $scope.appliedClass = function(difficulty){
             switch(difficulty){
+                case "Incomplete":
+                    return "btn-primary";
                 case "Easy":
                     return "btn-success";
                 case "Medium":
                     return "btn-info";
                 case "Hard":
+                    return "btn-default";
+                case "Very Hard":
                     return "btn-warning";
                 case "Failed":
                     return "btn-danger";
@@ -111,19 +120,44 @@ angular.module('myApp')
                     return "btn-primary";
             }
         };
+
+        $scope.alerts = [];
+
+        $scope.closeAlert = function(index) {
+            $scope.alerts.splice(index, 1);
+        };
+
+        $scope.save = function(){
+            if(!$rootScope.authenticated)
+                $scope.alerts[0] = {type: 'danger', msg: 'Please sign in to save progress.'};
+            else
+                $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
+            WeekFactory.getCurrentWeekNum()
+                .then(function(week){
+                    console.log("Current week: "+ week);
+                    $rootScope.current_week = week;
+                    WeekFactory.updateCurrentWeekNum($rootScope.current_week)
+                        .then(function(){
+                            console.log("week updated successful");
+                        });
+                })
+        };
+
     }])
 
     .controller('loginController',
-    ['$scope', '$location', 'AuthFactory',
-    function ($scope, $location, AuthFactory) {
+    ['$scope', '$location', 'AuthFactory','$rootScope',
+    function ($scope, $location, AuthFactory, $rootScope) {
 
         console.log("User Status: "+ AuthFactory.getUserStatus());
+        $scope.authenticated = AuthFactory.isLoggedIn();
 
         $scope.login = function () {
 
             // initial values
             $scope.error = false;
             $scope.disabled = true;
+
 
             // call login from service
             AuthFactory.login($scope.loginForm.username, $scope.loginForm.password)
@@ -132,6 +166,8 @@ angular.module('myApp')
                     $location.path('/');
                     $scope.disabled = false;
                     $scope.loginForm = {};
+                    $rootScope.authenticated = AuthFactory.isLoggedIn();
+                    $rootScope.current_user = AuthFactory.getUserName();
                 })
                 // handle error
                 .catch(function () {
@@ -146,17 +182,16 @@ angular.module('myApp')
     }])
 
     .controller('logoutController',
-    ['$scope', '$location', 'AuthFactory',
-    function ($scope, $location, AuthFactory) {
+    ['$scope', '$location', 'AuthFactory','$rootScope',
+    function ($scope, $location, AuthFactory,$rootScope) {
 
         $scope.logout = function () {
-
-            console.log("User Status: "+ AuthFactory.getUserStatus());
-
             // call logout from service
             AuthFactory.logout()
                 .then(function () {
                     $location.path('/login');
+                    $rootScope.authenticated = AuthFactory.isLoggedIn();
+                    $rootScope.current_user = "";
                 });
         };
     }])
@@ -184,7 +219,7 @@ angular.module('myApp')
                 // handle error
                 .catch(function () {
                     $scope.error = true;
-                    $scope.errorMessage = "Something went wrong!";
+                    $scope.errorMessage = "Username is already in use.";
                     $scope.disabled = false;
                     $scope.registerForm = {};
                 });

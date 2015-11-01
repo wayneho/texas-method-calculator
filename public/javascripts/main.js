@@ -1,8 +1,8 @@
 /**
  * Created by wayne on 10/24/2015.
  */
-
 var myApp = angular.module('myApp', ['ngRoute','ui.bootstrap']);
+
 
 myApp.config(function($routeProvider){
     $routeProvider
@@ -40,3 +40,4 @@ myApp.config(function($routeProvider){
             }
         });
     });
+
