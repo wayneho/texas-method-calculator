@@ -6,7 +6,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var Week = new Schema({
-    weekNumber: Number,
+    weekNumber: {type: Number, default: 1},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'Account'},
     startDate: {type: Date, default: Date.now},
     completed: {type: Boolean, default: false},

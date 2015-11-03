@@ -1,4 +1,5 @@
 <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
+<p>Week {{current_week}}</p>
 <table class="table table-striped table-condensed" ng-repeat="day in program">
     <caption>{{day.name}}</caption>
     <thead>

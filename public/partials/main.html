@@ -1,4 +1,4 @@
-<form class="form-horizontal" ng-Submit="updateData()">
+<form class="form-horizontal">
     <div class="form-group">
         <label for="squatInput" class="col-sm-3 control-label">Squat</label>
         <div class="col-sm-7">
@@ -23,7 +23,7 @@
             <input required type="text"  class="form-control text-center" id="ohpInput" ng-model="ohp"/>
         </div>
     </div>
-    <div class="col-sm-7 col-sm-offset-3">
-        <button type="submit" class="btn btn-primary">Generate Template</button>
+    <div class="btn-group col-sm-6 col-sm-offset-3">
+        <button class="btn btn-primary" ng-click="updateData()">Generate Template</button>
     </div>
 </form>

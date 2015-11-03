@@ -25,10 +25,15 @@ myApp.config(function($routeProvider){
             controller: 'registerController',
             access: {restricted: false}
         })
-        .when('/week-one',{
+        .when('/program',{
             templateUrl: '../partials/program.html',
-            controller: 'week-one',
+            controller: 'programController',
             access: {restricted: false}
+        })
+        .when('users',{
+            templateUrl: '../partials/program.html',
+            controller: 'usersController',
+            access: {restricted: true}
         })
         .otherwise({redirectTo: '/'});
     })

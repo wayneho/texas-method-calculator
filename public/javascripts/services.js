@@ -4,10 +4,10 @@
 
 angular.module('myApp')
     .factory('LiftFactory',function(){
-        var squat = '';
-        var bench = '';
-        var deadlift = '';
-        var ohp = '';
+        var squat = 0;
+        var bench = 0;
+        var deadlift = 0;
+        var ohp = 0;
 
         function setData(s,b,d,o){
             squat = s;
@@ -54,25 +54,20 @@ angular.module('myApp')
             // create a new instance of deferred
             var deferred = $q.defer();
 
-            // send a post request to the server
-            $http.post('/login', {username: username, password: password})
-                // handle success
-                .success(function (data, status) {
-                    if(status === 200 && data.status){
+            $http.post('/login', {username: username, password: password}).then(
+                function success(res){
+                    if(res.status === 200){
                         user = true;
                         user_name = username;
                         deferred.resolve();
-                    } else {
-                        user = false;
+                    }else
                         deferred.reject();
-                    }
-                })
-                // handle error
-                .error(function() {
+                },
+                function error(res){
                     user = false;
-                    deferred.reject();
-                });
-
+                    deferred.reject(res.data.err);
+                }
+            );
             // return promise object
             return deferred.promise;
         }
@@ -81,19 +76,16 @@ angular.module('myApp')
             // create a new instance of deferred
             var deferred = $q.defer();
 
-            // send a get request to the server
-            $http.get('/logout')
-                // handle success
-                .success(function () {
+            $http.get('/logout').then(
+                function success(){
                     user = false;
                     deferred.resolve();
-                })
-                // handle error
-                .error(function () {
+                },
+                function error(){
                     user = false;
                     deferred.reject();
-                });
-
+                }
+            );
             // return promise object
             return deferred.promise;
         }
@@ -102,21 +94,17 @@ angular.module('myApp')
             // create a new instance of deferred
             var deferred = $q.defer();
 
-            // send a post request to the server
-            $http.post('/register', {username: username, password: password})
-                // handle success
-                .success(function (data, status) {
-                    if(status === 200 && data.status){
+            $http.post('/register', {username: username, password: password}).then(
+                function success(res){
+                    if (res.status === 200)
                         deferred.resolve();
-                    } else {
+                    else
                         deferred.reject();
-                    }
-                })
-                // handle error
-                .error(function() {
-                    deferred.reject();
-                });
-
+                },
+                function error(res){
+                    deferred.reject(res.data.err);
+                }
+            );
             // return promise object
             return deferred.promise;
         }
@@ -134,23 +122,25 @@ angular.module('myApp')
 
     .factory('WeekFactory',['$q','$http','$rootScope','CalculateNextWeeksLiftsFactory', function($q, $http, $rootScope,CalculateNextWeeksLiftsFactory){
 
+        // Find the current week that the user is on
         function getCurrentWeekNum(){
             var deferred = $q.defer();
 
-            $http.get('/users/'+$rootScope.current_user)
-                // return the current week
-                .success(function(curr_week){
-                    deferred.resolve(curr_week);
-                })
-                .error(function(){
+            $http.get('/users/'+$rootScope.current_user).then(
+                function success(curr_week){
+                    deferred.resolve(curr_week.data);
+                },
+                function error(){
                     deferred.reject();
-                });
+                }
+            );
+
             return deferred.promise;
         }
 
         function updateCurrentWeekNum(week){
             var deferred = $q.defer();
-
+/*
             $http.put('/users/'+$rootScope.current_user,{currentWeek: week + 1})
                 .success(function() {
                     deferred.resolve();
@@ -158,24 +148,38 @@ angular.module('myApp')
                 .error(function(){
                     deferred.reject();
                 });
+                */
+            $http.put('/users/'+$rootScope.current_user,{currentWeek: week + 1}).then(
+                function success(){
+                    deferred.resolve();
+                },
+                function error(){
+                    deferred.reject();
+                }
+            );
             return deferred.promise;
         }
 
+        // returns the user data for the week number
         function getWeekInfo(weekNum){
             var deferred = $q.defer();
-            $http.get('/users/'+$rootScope.current_user+'/'+weekNum)
-                .success(function(weekObj){
-                    deferred.resolve(weekObj);
-                })
-                .error(function(){
+            console.log("weeknum passed in: " + weekNum);
+            $http.get('/users/'+$rootScope.current_user+'/'+weekNum).then(
+                function success(weekObj){
+                    console.log(weekObj);
+                    deferred.resolve(weekObj.data);
+                },
+                function error(){
                     deferred.reject();
-                });
+                }
+            );
             return deferred.promise;
         }
         //properties is an obj containing the properties of the week to update
         //ex: properties = {complete: false}
         function updateWeekInfo(weekNum, properties){
             var deferred = $q.defer();
+            /*
             $http.put('/users/'+$rootScope.current_user+'/'+weekNum, properties)
                 .success(function(){
                     deferred.resolve();
@@ -183,6 +187,15 @@ angular.module('myApp')
                 .error(function(){
                     deferred.reject();
                 });
+                */
+            $http.put('/users/'+$rootScope.current_user+'/'+weekNum, properties).then(
+                function success(){
+                    deferred.resolve();
+                },
+                function error(){
+                    deferred.reject();
+                }
+            );
             return deferred.promise;
         }
 
@@ -240,8 +253,8 @@ angular.module('myApp')
             };
 
             var deferred = $q.defer();
-
-            $http.post('/users/'+$rootScope.current_user+'/'+weekNum,
+/*
+            $http.post('/users/'+$rootScope.current_user,
                 {weekNum: weekNum, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay})
                 .success(function(){
                     deferred.resolve();
@@ -249,6 +262,40 @@ angular.module('myApp')
                 .error(function(){
                     deferred.reject();
                 });
+                */
+            $http.post('/users/'+$rootScope.current_user,
+                {weekNum: weekNum, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay}).then(
+                function success(){
+                    deferred.resolve();
+                },
+                function error(){
+                    deferred.reject();
+                }
+            );
+            return deferred.promise;
+        }
+
+        function saveWeekOne(weekObj){
+            var deferred = $q.defer();
+            /*
+            $http.post('/users/'+$rootScope.current_user,
+                {weekNumber: 1,volumeDay: weekObj.volumeDay, lightDay: weekObj.lightDay, intensityDay: weekObj.intensityDay})
+                .success(function(){
+                    deferred.resolve();
+                })
+                .error(function(){
+                    deferred.reject();
+                });
+                */
+            $http.post('/users/'+$rootScope.current_user,
+                {weekNumber: 1,volumeDay: weekObj.volumeDay, lightDay: weekObj.lightDay, intensityDay: weekObj.intensityDay}).then(
+                function success(){
+                    deferred.resolve();
+                },
+                function error(){
+                    deferred.reject();
+                }
+            );
             return deferred.promise;
         }
 
@@ -257,7 +304,8 @@ angular.module('myApp')
             updateCurrentWeekNum: updateCurrentWeekNum,
             getWeekInfo: getWeekInfo,
             updateWeekInfo: updateWeekInfo,
-            createWeek: createWeek
+            createWeek: createWeek,
+            saveWeekOne: saveWeekOne
         };
     }])
     .factory('CalculateNextWeeksLiftsFactory',function(){

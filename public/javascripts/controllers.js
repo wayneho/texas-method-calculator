@@ -6,42 +6,40 @@ angular.module('myApp')
     .run(function($rootScope){
         $rootScope.authenticated = false;
         $rootScope.current_user = "";
-        $rootScope.current_week = 0;
+        $rootScope.current_week = 1;
     })
 
     .controller('mainController',
     ['$scope','$location','LiftFactory',
     function($scope,$location,LiftFactory){
-        $scope.squat = 200;
-        $scope.bench = 200;
-        $scope.deadlift = 200;
-        $scope.ohp = 200;
+        $scope.squat = 315;
+        $scope.bench = 225;
+        $scope.deadlift = 395;
+        $scope.ohp = 135;
 
         $scope.updateData = function(){
             LiftFactory.setData($scope.squat,$scope.squat,$scope.deadlift,$scope.ohp);
-            $location.path('/week-one');
+            $location.path('/program');
         };
     }])
 
-    .controller('week-one',['$scope','LiftFactory','$rootScope','WeekFactory',
+    .controller('programController',['$scope','LiftFactory','$rootScope','WeekFactory',
     function($scope,LiftFactory, $rootScope, WeekFactory){
 
-        $scope.lifts = LiftFactory.getData();
-
         $scope.volumeDay = {
-            exercise1: {
+            squat: {
                 name: "Squat",
                 reps: "5x5",
-                weight: $scope.lifts.squat * 0.9,
+                weight: "",
                 difficulty: "-"
             },
-            exercise2: {
+            press: {
                 name: "Bench Press",
                 reps: "5x5",
-                weight: $scope.lifts.bench * 0.9,
+                weight: "",
                 difficulty: "-"
             },
-            exercise3: {
+            acc: {
                 name: "Accessory",
                 reps: "-",
                 weight: "-"
@@ -49,17 +47,17 @@ angular.module('myApp')
         };
 
         $scope.lightDay = {
-            exercise1: {
+            squat: {
                 name: "Squat",
                 reps: "2x5",
-                weight: $scope.lifts.squat * 0.72
+                weight: ""
             },
-            exercise2: {
+            press: {
                 name: "Overhead Press",
                 reps: "2x5",
-                weight: $scope.lifts.ohp * 0.9
+                weight: ""
             },
-            exercise3: {
+            acc: {
                 name: "Accessory",
                 reps: "-",
                 weight: "-"
@@ -67,22 +65,22 @@ angular.module('myApp')
         };
 
         $scope.intensityDay = {
-            exercise1: {
+            squat: {
                 name: "Squat",
                 reps: "1x5",
-                weight: parseInt($scope.lifts.squat)+5,
+                weight: "",
                 difficulty: "-"
             },
-            exercise2: {
+            press: {
                 name: "Bench Press",
                 reps: "1x5",
-                weight: parseInt($scope.lifts.bench)+5,
+                weight: "",
                 difficulty: "-"
             },
-            exercise3: {
+            deadlift: {
                 name: "Deadlift",
                 reps: "1x5",
-                weight: parseInt($scope.lifts.deadlift)+5,
+                weight: "",
                 difficulty: "-"
             }
         };
@@ -102,6 +100,55 @@ angular.module('myApp')
             }
         ];
 
+        // If not logged in or newly created user then generate data based on user input
+        function createData(){
+            var userData = LiftFactory.getData();
+            $scope.volumeDay.squat.weight  = Math.round(userData.squat * 0.9 *10)/10;
+            $scope.volumeDay.press.weight  = Math.round(userData.bench * 0.9 *10)/10;
+            $scope.lightDay.squat.weight = Math.round(userData.squat * 0.72 *10)/10;
+            $scope.lightDay.press.weight = Math.round(userData.ohp * 0.9 *10)/10;
+            $scope.intensityDay.squat.weight = Math.round((userData.squat+5) *10)/10;
+            $scope.intensityDay.press.weight = Math.round((userData.bench+5) *10)/10;
+            $scope.intensityDay.deadlift.weight = Math.round((userData.deadlift+5) *10)/10;
+        }
+
+        // If logged in get current week from database
+        if($rootScope.authenticated){
+            WeekFactory.getCurrentWeekNum()
+                .then(function(user_curr_week){
+                    $rootScope.current_week = user_curr_week;
+                    WeekFactory.getWeekInfo(user_curr_week)
+                        .then(function(weekObj){
+                            // Bench press on odd weeks and overhead press on even weeks
+                            // On light days the other press movement is trained
+                            var benchWeek = (weekObj.weekNumber)%2;
+
+                            $scope.volumeDay.squat.weight = weekObj.volumeDay.squat.weight;
+                            $scope.volumeDay.press.weight = benchWeek?weekObj.volumeDay.benchPress.weight:weekObj.volumeDay.overheadPress.weight;
+                            $scope.volumeDay.press.name = benchWeek?"Bench Press":"Overhead Press";
+
+                            $scope.lightDay.squat.weight = weekObj.lightDay.squat.weight;
+                            $scope.lightDay.press.weight = benchWeek?weekObj.lightDay.overheadPress.weight:weekObj.lightDay.benchPress.weight;
+                            $scope.lightDay.press.name = benchWeek?"Overhead Press":"Bench Press";
+
+                            $scope.intensityDay.squat.weight = weekObj.intensityDay.squat.weight;
+                            $scope.intensityDay.press.weight = benchWeek?weekObj.intensityDay.benchPress.weight:weekObj.intensityDay.overheadPress.weight;
+                            $scope.intensityDay.press.name = benchWeek?"Bench Press":"Overhead Press";
+                            $scope.intensityDay.deadlift.weight = weekObj.intensityDay.deadlift.weight;
+                        })
+                        // no user data found, generate the data
+                        .catch(function(){
+                            console.log("ALERT NEW USER no data saved!!!!");
+                            createData();
+                        })
+                });
+        }
+        // If not logged in, generate data based on user input
+        else{
+            createData();
+        }
+
+        // Give each drop-down option a different color
         $scope.appliedClass = function(difficulty){
             switch(difficulty){
                 case "Incomplete":
@@ -121,27 +168,80 @@ angular.module('myApp')
             }
         };
 
+        // Array containing alert messages
         $scope.alerts = [];
 
+        // Remove alert messages
         $scope.closeAlert = function(index) {
             $scope.alerts.splice(index, 1);
         };
 
+
         $scope.save = function(){
             if(!$rootScope.authenticated)
                 $scope.alerts[0] = {type: 'danger', msg: 'Please sign in to save progress.'};
-            else
+            else{
                 $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
-            WeekFactory.getCurrentWeekNum()
-                .then(function(week){
-                    console.log("Current week: "+ week);
-                    $rootScope.current_week = week;
-                    WeekFactory.updateCurrentWeekNum($rootScope.current_week)
-                        .then(function(){
-                            console.log("week updated successful");
-                        });
-                })
+
+
+                var weekObj = {
+                    intensityDay:{
+                        overheadPress:{
+                            weight: $scope.lifts.ohp+5,
+                            difficulty: "-"
+                        },
+                        deadlift:{
+                            weight: $scope.lifts.deadlift+5,
+                            difficulty: $scope.program[2].workout.deadlift.difficulty
+                        },
+                        benchPress:{
+                            weight: $scope.lifts.bench+5,
+                            difficulty: $scope.program[2].workout.bench.difficulty
+                        },
+                        squat:{
+                            weight: $scope.lifts.squat+5,
+                            difficulty: $scope.program[2].workout.squat.difficulty
+                        }
+                    },
+                    lightDay:{
+                        overheadPress: {
+                            weight: $scope.lifts.ohp *0.72
+                        },
+                        benchPress: {
+                            weight: $scope.lifts.bench *0.72
+                        },
+                        squat: {
+                            weight: $scope.lifts.squat * 0.72
+                        }
+                    },
+                    volumeDay:{
+                        overheadPress:{
+                            weight: $scope.lifts.ohp*0.9,
+                            difficulty: "-"
+                        },
+                        benchPress:{
+                            weight: $scope.lifts.bench*0.9,
+                            difficulty: $scope.program[0].workout.bench.difficulty
+                        },
+                        squat:{
+                            weight: $scope.lifts.bench*0.9,
+                            difficulty: $scope.program[0].workout.squat.difficulty
+                        }
+                    }
+                };
+                WeekFactory.saveWeekOne(weekObj)
+                    .then(function(){
+                        console.log("Week saved sucessfully");
+
+                    })
+            }
+
         };
+
+    }])
+
+    .controller('usersController', ['$scope','LiftFactory','$rootScope','WeekFactory',
+    function($scope,LiftFactory, $rootScope, WeekFactory){
 
     }])
 
@@ -170,9 +270,9 @@ angular.module('myApp')
                     $rootScope.current_user = AuthFactory.getUserName();
                 })
                 // handle error
-                .catch(function () {
+                .catch(function (err) {
                     $scope.error = true;
-                    $scope.errorMessage = "Invalid username and/or password";
+                    $scope.errorMessage = err.message;
                     $scope.disabled = false;
                     $scope.loginForm = {};
                 });
@@ -217,9 +317,9 @@ angular.module('myApp')
                     $scope.registerForm = {};
                 })
                 // handle error
-                .catch(function () {
+                .catch(function (err) {
                     $scope.error = true;
-                    $scope.errorMessage = "Username is already in use.";
+                    $scope.errorMessage = err.message;
                     $scope.disabled = false;
                     $scope.registerForm = {};
                 });
