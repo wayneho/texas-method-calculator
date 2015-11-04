@@ -140,15 +140,7 @@ angular.module('myApp')
 
         function updateCurrentWeekNum(week){
             var deferred = $q.defer();
-/*
-            $http.put('/users/'+$rootScope.current_user,{currentWeek: week + 1})
-                .success(function() {
-                    deferred.resolve();
-                })
-                .error(function(){
-                    deferred.reject();
-                });
-                */
+
             $http.put('/users/'+$rootScope.current_user,{currentWeek: week + 1}).then(
                 function success(){
                     deferred.resolve();
