@@ -85,7 +85,6 @@ router.route('/:username/:weekNum')
             if(req.body.hasOwnProperty(prop))
                 properties[prop] = req.body[prop]
         }
-        console.log(properties);
 
         Week.update({_id: req.weekNum[0]._id}, {$set: properties}, function(err){
             if(err) return res.send(500, err);

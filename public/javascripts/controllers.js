@@ -6,30 +6,44 @@ angular.module('myApp')
     .run(function($rootScope){
         $rootScope.authenticated = false;
         $rootScope.current_user = "";
-        $rootScope.current_week = 1;
+        $rootScope.display_week = 1;
     })
 
     .controller('mainController',
-    ['$scope','$location','LiftFactory',
-    function($scope,$location,LiftFactory){
+    ['$scope','$location','LiftFactory','WeekFactory','$rootScope',
+    function($scope,$location,LiftFactory,WeekFactory,$rootScope){
         $scope.squat = 315;
         $scope.bench = 225;
         $scope.deadlift = 395;
         $scope.ohp = 135;
 
         $scope.updateData = function(){
-            LiftFactory.setData($scope.squat,$scope.squat,$scope.deadlift,$scope.ohp);
-            $location.path('/program');
+            LiftFactory.setData($scope.squat,$scope.bench,$scope.deadlift,$scope.ohp);
+            if($rootScope.authenticated){
+                WeekFactory.getCurrentWeekNum()
+                    .then(function(user_curr_week){
+                        $rootScope.display_week = user_curr_week;
+                        $location.path('/program');
+                    })
+            }else{
+                $location.path('/program');
+            }
         };
     }])
 
-    .controller('programController',['$scope','LiftFactory','$rootScope','WeekFactory',
-    function($scope,LiftFactory, $rootScope, WeekFactory){
+    .controller('programController',['$scope','LiftFactory','$rootScope','WeekFactory','$q',
+    function($scope,LiftFactory, $rootScope, WeekFactory,$q){
 
+        // flag to check if new user
         var newUser = false;
+        // flag to check if its bench or overhead press week
         var benchWeek = true;
+        // week object retrieved from db
         var weekFromDB;
+        // user's inputted 5RM data
         var userData;
+        // flag to check if user input has changed
+        $scope.saved = true;
 
         $scope.volumeDay = {
             squat: {
@@ -48,7 +62,7 @@ angular.module('myApp')
                 name: "Accessory",
                 reps: "-",
                 weight: "-"
-            },
+            }
         };
 
         $scope.lightDay = {
@@ -106,7 +120,7 @@ angular.module('myApp')
             }
         ];
 
-        // If not logged in or newly created user then generate data based on user input
+        // If not logged in or is newly created user then generate data based on user input
         function createData(){
             userData = LiftFactory.getData();
             $scope.volumeDay.squat.weight  = Math.round(userData.squat * 0.9 *10)/10;
@@ -119,44 +133,45 @@ angular.module('myApp')
 
         }
 
-        // If logged in get current week from database
+        // Retrieve data from database based on display week
+        function reloadData(){
+            WeekFactory.getWeekInfo($rootScope.display_week)
+                .then(function(week){
+                    // Bench press on odd weeks and overhead press on even weeks
+                    // On light days the other press movement is trained
+                    weekFromDB = week;
+                    benchWeek = (week.weekNumber)%2;
+
+                    $scope.volumeDay.squat.weight = week.volumeDay.squat.weight;
+                    $scope.volumeDay.squat.difficulty = week.volumeDay.squat.difficulty;
+                    $scope.volumeDay.press.weight = benchWeek?week.volumeDay.benchPress.weight:week.volumeDay.overheadPress.weight;
+                    $scope.volumeDay.press.difficulty =  benchWeek?week.volumeDay.benchPress.difficulty:week.volumeDay.overheadPress.difficulty;
+                    $scope.volumeDay.press.name = benchWeek?"Bench Press":"Overhead Press";
+
+                    $scope.lightDay.squat.weight = week.lightDay.squat.weight;
+                    $scope.lightDay.press.weight = benchWeek?week.lightDay.overheadPress.weight:week.lightDay.benchPress.weight;
+                    $scope.lightDay.press.name = benchWeek?"Overhead Press":"Bench Press";
+
+                    $scope.intensityDay.squat.weight = week.intensityDay.squat.weight;
+                    $scope.intensityDay.squat.difficulty = week.intensityDay.squat.difficulty;
+                    $scope.intensityDay.press.weight = benchWeek?week.intensityDay.benchPress.weight:week.intensityDay.overheadPress.weight;
+                    $scope.intensityDay.press.difficulty = benchWeek?week.intensityDay.benchPress.difficulty:week.intensityDay.overheadPress.difficulty;
+                    $scope.intensityDay.press.name = benchWeek?"Bench Press":"Overhead Press";
+                    $scope.intensityDay.deadlift.weight = week.intensityDay.deadlift.weight;
+                    $scope.intensityDay.deadlift.difficulty = week.intensityDay.deadlift.difficulty;
+
+                })
+                // no user data found, generate the data
+                .catch(function(){
+                    console.log("ALERT NEW USER no data saved!!!!");
+                    newUser = true;
+                    createData();
+                })
+        }
+
+        // If logged in get the displayed week from database
         if($rootScope.authenticated){
-            WeekFactory.getCurrentWeekNum()
-                .then(function(user_curr_week){
-                    $rootScope.current_week = user_curr_week;
-                    WeekFactory.getWeekInfo(user_curr_week)
-                        .then(function(week){
-                            // Bench press on odd weeks and overhead press on even weeks
-                            // On light days the other press movement is trained
-                            weekFromDB = week;
-                            benchWeek = (week.weekNumber)%2;
-
-                            $scope.volumeDay.squat.weight = week.volumeDay.squat.weight;
-                            $scope.volumeDay.squat.difficulty = week.volumeDay.squat.difficulty;
-                            $scope.volumeDay.press.weight = benchWeek?week.volumeDay.benchPress.weight:week.volumeDay.overheadPress.weight;
-                            $scope.volumeDay.press.difficulty =  benchWeek?week.volumeDay.benchPress.difficulty:week.volumeDay.overheadPress.difficulty;
-                            $scope.volumeDay.press.name = benchWeek?"Bench Press":"Overhead Press";
-
-                            $scope.lightDay.squat.weight = week.lightDay.squat.weight;
-                            $scope.lightDay.press.weight = benchWeek?week.lightDay.overheadPress.weight:week.lightDay.benchPress.weight;
-                            $scope.lightDay.press.name = benchWeek?"Overhead Press":"Bench Press";
-
-                            $scope.intensityDay.squat.weight = week.intensityDay.squat.weight;
-                            $scope.intensityDay.squat.difficulty = week.intensityDay.squat.difficulty;
-                            $scope.intensityDay.press.weight = benchWeek?week.intensityDay.benchPress.weight:week.intensityDay.overheadPress.weight;
-                            $scope.intensityDay.press.difficulty = benchWeek?week.intensityDay.benchPress.difficulty:week.intensityDay.overheadPress.difficulty;
-                            $scope.intensityDay.press.name = benchWeek?"Bench Press":"Overhead Press";
-                            $scope.intensityDay.deadlift.weight = week.intensityDay.deadlift.weight;
-                            $scope.intensityDay.deadlift.difficulty = week.intensityDay.deadlift.difficulty;
-
-                        })
-                        // no user data found, generate the data
-                        .catch(function(){
-                            console.log("ALERT NEW USER no data saved!!!!");
-                            newUser = true;
-                            createData();
-                        })
-                });
+            reloadData();
         }
         // If not logged in, generate data based on user input
         else{
@@ -173,14 +188,16 @@ angular.module('myApp')
                 case "Medium":
                     return "btn-info";
                 case "Hard":
-                    return "btn-default";
-                case "Very Hard":
                     return "btn-warning";
-                case "Failed":
+                case "Very Hard":
                     return "btn-danger";
                 default:
                     return "btn-primary";
             }
+        };
+
+        $scope.changeSavedFlag = function(){
+            $scope.saved = false;
         };
 
         // Array containing alert messages
@@ -191,12 +208,12 @@ angular.module('myApp')
             $scope.alerts.splice(index, 1);
         };
 
+        // save user data
         $scope.save = function(){
+            var deferred = $q.defer();
             if(!$rootScope.authenticated)
                 $scope.alerts[0] = {type: 'danger', msg: 'Please sign in to save progress.'};
             else{
-                $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
-
                 // Week object to save in database
                 var weekObj = {
                     intensityDay:{
@@ -244,18 +261,27 @@ angular.module('myApp')
                     }
                 };
 
+                // calculate week 1 numbers
                 if(newUser){
                     weekObj.volumeDay.benchPress.weight = Math.round(userData.bench * 0.9 *10)/10;
                     weekObj.volumeDay.overheadPress.weight = Math.round(userData.ohp * 0.9 *10)/10;
-                    weekObj.lightDay.benchPress.weight = Math.round(userData.bench * 0.9 *10)/10;
-                    weekObj.lightDay.overheadPress.weight = Math.round(userData.ohp * 0.9 *10)/10;
+                    weekObj.lightDay.benchPress.weight = Math.round(userData.bench * 0.72 *10)/10;
+                    weekObj.lightDay.overheadPress.weight = Math.round(userData.ohp * 0.72 *10)/10;
                     weekObj.intensityDay.benchPress.weight = Math.round((parseInt(userData.bench)+5) *10)/10;
                     weekObj.intensityDay.overheadPress.weight = Math.round((parseInt(userData.ohp)+5) *10)/10;
 
                     WeekFactory.saveWeekOne(weekObj)
                         .then(function(){
-                            console.log("Week saved sucessfully");
+                            $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
+                            $scope.saved = true;
+                            newUser = false;
+                            deferred.resolve();
+                            reloadData();
                         })
+                        .catch(function(){
+                            deferred.reject();
+                            $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
+                        });
 
                 }else{
                     weekObj.volumeDay.benchPress.weight = weekFromDB.volumeDay.benchPress.weight;
@@ -265,13 +291,94 @@ angular.module('myApp')
                     weekObj.intensityDay.benchPress.weight = weekFromDB.intensityDay.benchPress.weight;
                     weekObj.intensityDay.overheadPress.weight = weekFromDB.intensityDay.overheadPress.weight;
 
-                    WeekFactory.updateWeekInfo($rootScope.current_week, weekObj)
+                    WeekFactory.updateWeekInfo($rootScope.display_week, weekObj)
                         .then(function(){
-                            console.log("Week updated successfully");
+                            $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
+                            $scope.saved = true;
+                            deferred.resolve();
                         })
+                        .catch(function(){
+                            $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
+                            deferred.reject();
+                        });
                 }
             }
+            return deferred.promise;
+        };
+
+
+        // Create and display the next week
+        // If its an old week then just display it
+        function displayNextWeek(){
+            WeekFactory.getCurrentWeekNum()
+                .then(function (currentWeek) {
+                    // week already exists, display it in views
+                    if ($rootScope.display_week < currentWeek) {
+                        $rootScope.display_week += 1;
+                        reloadData();
+                    } else {
+                        // create a new week in the database and display it
+                        WeekFactory.createWeek($rootScope.display_week)
+                            .then(function () {
+                                WeekFactory.updateCurrentWeekNum($rootScope.display_week).then(function () {
+                                    console.log("Created and updated user to week: " + ($rootScope.display_week + 1));
+                                    $rootScope.display_week += 1;
+                                    $scope.saved = true;
+                                    reloadData();
+                                });
+
+                            })
+                    }
+                });
         }
+
+
+        $scope.nextWeek = function(){
+            // Check if drop down boxes are filled in
+            if($scope.volumeDay.squat.difficulty !== "-" &&
+                $scope.volumeDay.press.difficulty !== "-" &&
+                $scope.intensityDay.squat.difficulty !== "-" &&
+                $scope.intensityDay.press.difficulty !== "-" &&
+                $scope.intensityDay.deadlift.difficulty !== "-") {
+
+                if($scope.saved){
+                    displayNextWeek();
+                }else{
+                    $scope.save()
+                        .then(function(){
+                            displayNextWeek();
+                            $scope.closeAlert();
+                        })
+                        .catch(function(){
+                            $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
+                        });
+                }
+            }else{
+                $scope.alerts[0] = {type: 'danger', msg: 'Week not yet completed.'};
+            }
+        };
+
+        $scope.previousWeek = function(){
+            if($rootScope.display_week > 1){
+                if($scope.saved){
+                    $rootScope.display_week-=1;
+                    reloadData();
+                }else{
+                    $scope.save()
+                        .then(function(){
+                            $rootScope.display_week-=1;
+                            reloadData();
+                            $scope.closeAlert();
+                        })
+                        .catch(function(){
+                            $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
+                        });
+                }
+            }else{
+                console.log("Week 0 does not exist.")
+            }
+        };
+
     }])
 
     .controller('usersController', ['$scope','LiftFactory','$rootScope','WeekFactory',

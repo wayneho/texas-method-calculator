@@ -1,5 +1,5 @@
 <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</uib-alert>
-<p>Week {{current_week}}</p>
+<p>Week {{display_week}} Saved? {{saved}}</p>
 <table class="table table-striped table-condensed" ng-repeat="day in program">
     <caption>{{day.name}}</caption>
     <thead>
@@ -20,12 +20,11 @@
                     {{exercise.difficulty}} <span class="caret"></span>
                 </button>
                 <ul class="uib-dropdown-menu">
-                    <li ng-click="exercise.difficulty = '-'"><a href="">-</a></li>
-                    <li ng-click="exercise.difficulty = 'Easy'"><a href="">Easy</a></li>
-                    <li ng-click="exercise.difficulty = 'Medium'"><a href="">Medium</a></li>
-                    <li ng-click="exercise.difficulty = 'Hard'"><a href="">Hard</a></li>
-                    <li ng-click="exercise.difficulty = 'Very Hard'"><a href="">Very Hard</a></li>
-                    <li ng-click="exercise.difficulty = 'Failed'"><a href="">Failed</a></li>
+                    <li ng-click="exercise.difficulty = '-'; changeSavedFlag()"><a href="">-</a></li>
+                    <li ng-click="exercise.difficulty = 'Easy'; changeSavedFlag()"><a href="">Easy</a></li>
+                    <li ng-click="exercise.difficulty = 'Medium'; changeSavedFlag()"><a href="">Medium</a></li>
+                    <li ng-click="exercise.difficulty = 'Hard'; changeSavedFlag()"><a href="">Hard</a></li>
+                    <li ng-click="exercise.difficulty = 'Very Hard'; changeSavedFlag()"><a href="">Very Hard</a></li>
                 </ul>
             </td>
         </tr>
@@ -33,8 +32,9 @@
 </table>
 
 <div class="btn-group pull-right">
+    <button class="btn btn-primary" ng-show="display_week > 1" ng-click="previousWeek()">Previous week</button>
     <button class="btn btn-primary" ng-click="save()">Save</button>
-    <button class="btn btn-primary">Proceed to next week</button>
+    <button class="btn btn-primary" ng-click="nextWeek()">Next week</button>
 </div>
 
 

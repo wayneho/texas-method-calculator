@@ -119,8 +119,7 @@ angular.module('myApp')
             register: register
         });
     }])
-
-    .factory('WeekFactory',['$q','$http','$rootScope','CalculateNextWeeksLiftsFactory', function($q, $http, $rootScope,CalculateNextWeeksLiftsFactory){
+    .factory('WeekFactory',['$q','$http','$rootScope', function($q, $http, $rootScope){
 
         // Find the current week that the user is on
         function getCurrentWeekNum(){
@@ -158,7 +157,6 @@ angular.module('myApp')
             console.log("weeknum passed in: " + weekNum);
             $http.get('/users/'+$rootScope.current_user+'/'+weekNum).then(
                 function success(weekObj){
-                    console.log(weekObj);
                     deferred.resolve(weekObj.data);
                 },
                 function error(){
@@ -171,15 +169,7 @@ angular.module('myApp')
         //ex: properties = {complete: false}
         function updateWeekInfo(weekNum, properties){
             var deferred = $q.defer();
-            /*
-            $http.put('/users/'+$rootScope.current_user+'/'+weekNum, properties)
-                .success(function(){
-                    deferred.resolve();
-                })
-                .error(function(){
-                    deferred.reject();
-                });
-                */
+
             $http.put('/users/'+$rootScope.current_user+'/'+weekNum, properties).then(
                 function success(){
                     deferred.resolve();
@@ -191,94 +181,182 @@ angular.module('myApp')
             return deferred.promise;
         }
 
-        function createWeek(weekNum, weekObj){
+        //figures out next weeks numbers based on workout difficulty
+        function getWeight(VD, ID) {
+            if (VD === "Easy") {
+                if (ID === "Easy")
+                    return {
+                        diagnosis: "Low-balling - Progress both days quickly.",
+                        volumeFactor: 10,
+                        intensityFactor: 10
+                    };
+                if (ID === "Medium")
+                    return {
+                        diagnosis: "Low volume - Volume will eventually need to increase for intensity to increase.",
+                        volumeFactor: 5,
+                        intensityFactor: 5
+                    };
+                if (ID === "Hard" || ID === "Very Hard")
+                    return {
+                        diagnosis: "Volume wrong - Not enough volume dose to push intensity.",
+                        volumeFactor: 10,
+                        intensityFactor: 5
+                    };
+            }
+            if (VD === "Medium") {
+                if (ID === "Easy")
+                    return {
+                        diagnosis: "Low intensity - Intensity is low-balled.",
+                        volumeFactor: 5,
+                        intensityFactor: 10
+                    };
+                if (ID === "Medium")
+                    return {
+                        diagnosis: "Decent - Continue intensity progress as normal.",
+                        volumeFactor: 0,
+                        intensityFactor: 5
+                    };
+                if (ID === "Hard")
+                    return {
+                        diagnosis: "Standard - Normal progression",
+                        volumeFactor: 0,
+                        intensityFactor: 5
+                    };
+                if (ID === "Very Hard")
+                    return {
+                        diagnosis: "Standard - Normal progression, volume will increase to drive intensity",
+                        volumeFactor: 5,
+                        intensityFactor: 5
+                    };
+            }
+            if (VD === "Hard") {
+                if (ID === "Easy")
+                    return {
+                        diagnosis: "High Volume, low intensity - decrease volume and progress intensity",
+                        volumeFactor: -5,
+                        intensityFactor: 10
+                    };
+                if (ID === "Medium")
+                    return {
+                        diagnosis: "High Volume, low intensity - hold volume constant, progress intensity",
+                        volumeFactor: 0,
+                        intensityFactor: 5
+                    };
+                if (ID === "Hard")
+                    return {
+                        diagnosis: "Standard - Normal progression, increase volume/intensity discrepancy",
+                        volumeFactor: 0,
+                        intensityFactor: 5
+                    };
+                if (ID === "Very Hard")
+                    return {
+                        diagnosis: "Veteran - nearing end of current progression",
+                        volumeFactor: 0,
+                        intensityFactor: 5
+                    };
+            }
+            if (VD === "Very Hard") {
+                if (ID === "Easy")
+                    return {
+                        diagnosis: "High volume, low intensity - reduce volume significantly and progress intensity",
+                        volumeFactor: -10,
+                        intensityFactor: 10
+                    };
+                if (ID === "Medium")
+                    return {
+                        diagnosis: "High volume, low intensity - reduce volume, progress intensity",
+                        volumeFactor: -5,
+                        intensityFactor: 5
+                    };
+                if (ID === "Hard")
+                    return {
+                        diagnosis: "Volume wrong - reduce volume, progress intensity",
+                        volumeFactor: -5,
+                        intensityFactor: 5
+                    };
+                if (ID === "Very Hard")
+                    return {
+                        diagnosis: "Veteran - Close to end of progression, good luck. Try less volume",
+                        volumeFactor: -5,
+                        intensityFactor: 5
+                    };
+            }
+        }
+
+        function createWeek(weekNum){
             // Alternate between bench and ohp each week
-            var bench_week = weekNum % 2 !== 0;
+            var bench_week = weekNum%2;
 
-            // Factor to increase or decrease next weeks lift
-            var sq_factor = CalculateNextWeeksLiftsFactory(weekObj.volumeDay.squat.difficulty, weekObj.intensityDay.squat.difficulty);
-            var b_factor = CalculateNextWeeksLiftsFactory(weekObj.volumeDay.bench.difficulty, weekObj.intensityDay.bench.difficulty);
-            var ohp_factor = CalculateNextWeeksLiftsFactory(weekObj.volumeDay.overheadPress.difficulty, weekObj.intensityDay.overheadPress.difficulty);
+            return getWeekInfo(weekNum)
+                .then(function(weekObj){
+                    // Factor to increase or decrease next weeks lift
+                    var sq_factor = getWeight(weekObj.volumeDay.squat.difficulty, weekObj.intensityDay.squat.difficulty);
+                    var b_factor = getWeight(weekObj.volumeDay.benchPress.difficulty, weekObj.intensityDay.benchPress.difficulty);
+                    var ohp_factor = getWeight(weekObj.volumeDay.overheadPress.difficulty, weekObj.intensityDay.overheadPress.difficulty);
 
-            var volumeDay = {
-                squat: {
-                    weight: weekObj.volumeDay.squat.weight + sq_factor.volumeFactor,
-                    difficulty: "-"
-                },
-                benchPress: {
-                    weight: bench_week?weekObj.volumeDay.benchPress.weight + b_factor.volumeFactor : weekObj.volumeDay.benchPress.weight,
-                    difficulty: "-"
-                },
-                overheadPress: {
-                    weight: bench_week?weekObj.volumeDay.overheadPress.weight: weekObj.volumeDay.overheadPress.weight + ohp_factor.volumeDay,
-                    difficulty: "-"
-                }
-            };
-            var lightDay = {
-                squat: {
-                    weight: weekObj.lightDay.squat.weight * 0.72
-                },
-                benchPress: {
-                    weight: weekObj.lightDay.benchPress.weight * 0.72
-                },
-                overheadPress: {
-                    weight: weekObj.lightDay.overheadPress.weight * 0.72
-                }
-            };
-            var intensityDay= {
-                squat: {
-                    weight: weekObj.intensityDay.squat.weight + sq_factor.intensityFactor,
-                    difficulty: "-"
-                },
-                benchPress: {
-                    weight: bench_week?weekObj.intensityDay.benchPress.weight + b_factor.intensityFactor : weekObj.intensityDay.benchPress.weight,
-                    difficulty: "-"
-                },
-                deadlift: {
-                    weight: weekObj.intensityDay.deadlift.weight + 5,
-                    difficulty: "-"
-                },
-                overheadPress: {
-                    weight: bench_week?weekObj.intensityDay.overheadPress.weight : weekObj.intensityDay.overheadPress.weight + ohp_factor.intensityDay,
-                    difficulty: "-"
-                }
-            };
+                    var volumeDay = {
+                        squat: {
+                            weight: weekObj.volumeDay.squat.weight + sq_factor.volumeFactor,
+                            difficulty: "-"
+                        },
+                        benchPress: {
+                            weight: bench_week?weekObj.volumeDay.benchPress.weight + b_factor.volumeFactor : weekObj.volumeDay.benchPress.weight,
+                            difficulty: "-"
+                        },
+                        overheadPress: {
+                            weight: bench_week?weekObj.volumeDay.overheadPress.weight: weekObj.volumeDay.overheadPress.weight + ohp_factor.volumeFactor,
+                            difficulty: "-"
+                        }
+                    };
+                    var lightDay = {
+                        squat: {
+                            weight: Math.round(weekObj.volumeDay.squat.weight * 0.9 *10)/10
+                        },
+                        benchPress: {
+                            weight: Math.round(weekObj.volumeDay.benchPress.weight * 0.9 *10)/10
+                        },
+                        overheadPress: {
+                            weight: Math.round(weekObj.volumeDay.overheadPress.weight * 0.9 *10)/10
+                        }
+                    };
+                    var intensityDay= {
+                        squat: {
+                            weight: weekObj.intensityDay.squat.weight + sq_factor.intensityFactor,
+                            difficulty: "-"
+                        },
+                        benchPress: {
+                            weight: bench_week?weekObj.intensityDay.benchPress.weight + b_factor.intensityFactor : weekObj.intensityDay.benchPress.weight,
+                            difficulty: "-"
+                        },
+                        deadlift: {
+                            weight: weekObj.intensityDay.deadlift.weight + 5,
+                            difficulty: "-"
+                        },
+                        overheadPress: {
+                            weight: bench_week?weekObj.intensityDay.overheadPress.weight : weekObj.intensityDay.overheadPress.weight + ohp_factor.intensityFactor,
+                            difficulty: "-"
+                        }
+                    };
+                    var deferred = $q.defer();
 
-            var deferred = $q.defer();
-/*
-            $http.post('/users/'+$rootScope.current_user,
-                {weekNum: weekNum, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay})
-                .success(function(){
-                    deferred.resolve();
+                    $http.post('/users/'+$rootScope.current_user,
+                        {weekNumber: weekNum+1, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay}).then(
+                        function success(){
+                            deferred.resolve();
+                        },
+                        function error(){
+                            deferred.reject();
+                        }
+                    );
+                    return deferred.promise;
                 })
-                .error(function(){
-                    deferred.reject();
+                .catch(function(){
+                    console.log("Failed to retrieve week " + weekNum);
                 });
-                */
-            $http.post('/users/'+$rootScope.current_user,
-                {weekNum: weekNum, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay}).then(
-                function success(){
-                    deferred.resolve();
-                },
-                function error(){
-                    deferred.reject();
-                }
-            );
-            return deferred.promise;
         }
 
         function saveWeekOne(weekObj){
             var deferred = $q.defer();
-            /*
-            $http.post('/users/'+$rootScope.current_user,
-                {weekNumber: 1,volumeDay: weekObj.volumeDay, lightDay: weekObj.lightDay, intensityDay: weekObj.intensityDay})
-                .success(function(){
-                    deferred.resolve();
-                })
-                .error(function(){
-                    deferred.reject();
-                });
-                */
             $http.post('/users/'+$rootScope.current_user,
                 {weekNumber: 1,volumeDay: weekObj.volumeDay, lightDay: weekObj.lightDay, intensityDay: weekObj.intensityDay}).then(
                 function success(){
@@ -298,115 +376,5 @@ angular.module('myApp')
             updateWeekInfo: updateWeekInfo,
             createWeek: createWeek,
             saveWeekOne: saveWeekOne
-        };
-    }])
-    .factory('CalculateNextWeeksLiftsFactory',function(){
-
-        //figures out next weeks numbers based on workout difficulty
-        function getWeight(VD, ID){
-            if(VD === "Easy"){
-                if(ID === "Easy")
-                    return {
-                        diagnosis: "Low-balling - Progress both days quickly.",
-                        volumeFactor: 10,
-                        intensityFactor: 10
-                    };
-                if(ID === "Medium")
-                    return {
-                        diagnosis: "Low volume - Volume will eventually need to increase for intensity to increase.",
-                        volumeFactor: 5,
-                        intensityFactor: 5
-                    };
-                if(ID === "Hard" || ID === "Very Hard")
-                    return {
-                        diagnosis: "Volume wrong - Not enough volume dose to push intensity.",
-                        volumeFactor: 10,
-                        intensityFactor: 5
-                    };
-            }
-            if(VD === "Medium"){
-                if(ID === "Easy")
-                    return {
-                        diagnosis: "Low intensity - Intensity is low-balled.",
-                        volumeFactor: 5,
-                        intensityFactor: 10
-                    };
-                if(ID === "Medium")
-                    return {
-                        diagnosis: "Decent - Continue intensity progress as normal.",
-                        volumeFactor: 0,
-                        intensityFactor: 5
-                    };
-                if(ID === "Hard")
-                    return {
-                        diagnosis: "Standard - Normal progression",
-                        volumeFactor: 0,
-                        intensityFactor: 5
-                    };
-                if(ID === "Very Hard")
-                    return {
-                        diagnosis: "Standard - Normal progression, volume will increase to drive intensity",
-                        volumeFactor: 5,
-                        intensityFactor: 5
-                    };
-            }
-            if(VD === "Hard"){
-                if(ID === "Easy")
-                    return {
-                        diagnosis: "High Volume, low intensity - decrease volume and progress intensity",
-                        volumeFactor: -5,
-                        intensityFactor: 10
-                    };
-                if(ID === "Medium")
-                    return {
-                        diagnosis: "High Volume, low intensity - hold volume constant, progress intensity",
-                        volumeFactor: 0,
-                        intensityFactor: 5
-                    };
-                if(ID === "Hard")
-                    return {
-                        diagnosis: "Standard - Normal progression, increase volume/intensity discrepancy",
-                        volumeFactor: 0,
-                        intensityFactor: 5
-                    };
-                if(ID === "Very Hard")
-                    return {
-                        diagnosis: "Veteran - nearing end of current progression",
-                        volumeFactor: 0,
-                        intensityFactor: 5
-                    };
-            }
-            if(VD === "Very Hard"){
-                if(ID === "Easy")
-                    return {
-                        diagnosis: "High volume, low intensity - reduce volume significantly and progress intensity",
-                        volumeFactor: -10,
-                        intensityFactor: 10
-                    };
-                if(ID === "Medium")
-                    return {
-                        diagnosis: "High volume, low intensity - reduce volume, progress intensity",
-                        volumeFactor:-5,
-                        intensityFactor: 5
-                    };
-                if(ID === "Hard")
-                    return {
-                        diagnosis: "Volume wrong - reduce volume, progress intensity",
-                        volumeFactor: -5,
-                        intensityFactor: 5
-                    };
-                if(ID === "Very Hard")
-                    return {
-                        diagnosis: "Veteran - Close to end of progression, good luck. Try less volume",
-                        volumeFactor: -5,
-                        intensityFactor: 5
-                    };
-            }
         }
-
-
-        return {
-            getWeight: getWeight
-        };
-
-    });
+    }]);
