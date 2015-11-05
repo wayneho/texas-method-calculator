@@ -7,6 +7,7 @@ angular.module('myApp')
         $rootScope.authenticated = false;
         $rootScope.current_user = "";
         $rootScope.display_week = 1;
+        $rootScope.current_week = 1;
     })
 
     .controller('mainController',
@@ -17,12 +18,15 @@ angular.module('myApp')
         $scope.deadlift = 395;
         $scope.ohp = 135;
 
+        // save user input in temporary variable
+        // if user is logged in get the current week
         $scope.updateData = function(){
             LiftFactory.setData($scope.squat,$scope.bench,$scope.deadlift,$scope.ohp);
             if($rootScope.authenticated){
                 WeekFactory.getCurrentWeekNum()
                     .then(function(user_curr_week){
                         $rootScope.display_week = user_curr_week;
+                        $rootScope.current_week = user_curr_week;
                         $location.path('/program');
                     })
             }else{
@@ -310,26 +314,25 @@ angular.module('myApp')
         // Create and display the next week
         // If its an old week then just display it
         function displayNextWeek(){
-            WeekFactory.getCurrentWeekNum()
-                .then(function (currentWeek) {
-                    // week already exists, display it in views
-                    if ($rootScope.display_week < currentWeek) {
-                        $rootScope.display_week += 1;
-                        reloadData();
-                    } else {
-                        // create a new week in the database and display it
-                        WeekFactory.createWeek($rootScope.display_week)
-                            .then(function () {
-                                WeekFactory.updateCurrentWeekNum($rootScope.display_week).then(function () {
-                                    console.log("Created and updated user to week: " + ($rootScope.display_week + 1));
-                                    $rootScope.display_week += 1;
-                                    $scope.saved = true;
-                                    reloadData();
-                                });
+            // week already exists, display it in views
+            if ($rootScope.display_week < $rootScope.current_week) {
+                $rootScope.display_week += 1;
+                reloadData();
+            } else {
+                // create a new week in the database and display it
+                WeekFactory.createWeek($rootScope.current_week)
+                    .then(function () {
+                        // update the user's current week
+                        WeekFactory.updateCurrentWeekNum($rootScope.current_week).then(function () {
+                            console.log("Created and updated user to week: " + ($rootScope.current_week + 1));
+                            $rootScope.display_week += 1;
+                            $rootScope.current_week += 1;
+                            $scope.saved = true;
+                            reloadData();
+                        });
 
-                            })
-                    }
-                });
+                    })
+            }
         }
 
 
@@ -341,6 +344,7 @@ angular.module('myApp')
                 $scope.intensityDay.press.difficulty !== "-" &&
                 $scope.intensityDay.deadlift.difficulty !== "-") {
 
+                // display next week if nothing changed
                 if($scope.saved){
                     displayNextWeek();
                 }else{
@@ -357,7 +361,7 @@ angular.module('myApp')
                 $scope.alerts[0] = {type: 'danger', msg: 'Week not yet completed.'};
             }
         };
-
+        // display previous week
         $scope.previousWeek = function(){
             if($rootScope.display_week > 1){
                 if($scope.saved){
