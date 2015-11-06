@@ -3,6 +3,7 @@
   <head>
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/angular-chart.js/dist/angular-chart.css">
     <title><%= title %></title>
   </head>
   <body>
@@ -10,9 +11,9 @@
       <nav class="navbar-fluid navbar-default navbar-fixed-top">
         <div class="container">
           <a class="navbar-brand" href="#/"> <%= title %> </a>
-          <p class="navbar-text"> Program Generator</p>
+          <p class="navbar-text"> New user? {{new_user}}</p>
           <p class="navbar-right navbar-text" ng-hide="authenticated"><a href="#/login">Login</a> or <a href="#/register">Register</a></p>
-          <p class="navbar-right navbar-text" ng-show="authenticated" ng-controller="logoutController"><a href="#" ng-click="logout()">Logout</a></p>
+          <p class="navbar-right navbar-text" ng-show="authenticated" ng-controller="logoutController"><a href="#/" ng-click="logout()">Logout</a></p>
           <p class="navbar-right navbar-text" ng-show="authenticated" >Signed in as {{current_user}}</p>
         </div>
       </nav>
@@ -29,5 +30,8 @@
     <script src="./javascripts/main.js"></script>
     <script src="./javascripts/controllers.js"></script>
     <script src="./javascripts/services.js"></script>
+    <script src="bower_components/Chart.js/Chart.js"></script>
+    <script src="bower_components/angular-chart.js/dist/angular-chart.js"></script>
+
   </body>
 </html>

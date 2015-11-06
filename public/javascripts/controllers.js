@@ -8,6 +8,7 @@ angular.module('myApp')
         $rootScope.current_user = "";
         $rootScope.display_week = 1;
         $rootScope.current_week = 1;
+        $rootScope.new_user = true;
     })
 
     .controller('mainController',
@@ -18,28 +19,52 @@ angular.module('myApp')
         $scope.deadlift = 395;
         $scope.ohp = 135;
 
-        // save user input in temporary variable
-        // if user is logged in get the current week
+        // create first week for users with no data based on user input
         $scope.updateData = function(){
             LiftFactory.setData($scope.squat,$scope.bench,$scope.deadlift,$scope.ohp);
-            if($rootScope.authenticated){
-                WeekFactory.getCurrentWeekNum()
-                    .then(function(user_curr_week){
-                        $rootScope.display_week = user_curr_week;
-                        $rootScope.current_week = user_curr_week;
-                        $location.path('/program');
-                    })
-            }else{
-                $location.path('/program');
-            }
+            $location.path('/program');
+        };
+
+        WeekFactory.getCurrentWeekNum()
+            .then(function(user_curr_week){
+                $rootScope.display_week = user_curr_week;
+                $rootScope.current_week = user_curr_week;
+
+                var weeks = [],
+                    sqData = [],
+                    bData = [],
+                    dData = [],
+                    ohpData = [];
+
+                for(var i = 1; i < user_curr_week+1; i++){
+                    weeks.push("Week "+ i);
+                    WeekFactory.getWeekInfo(i)
+                        .then(function(weekObj){
+                            sqData.push(weekObj.intensityDay.squat.weight);
+                            bData.push(weekObj.intensityDay.benchPress.weight);
+                            dData.push(weekObj.intensityDay.deadlift.weight);
+                            ohpData.push(weekObj.intensityDay.overheadPress.weight);
+                        });
+                }
+                $scope.labels = weeks;
+                $scope.series = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
+                $scope.colours = ['#3366FF', '#ff0027', '#008B2E', '#131214'];
+                $scope.data = [sqData, bData, dData, ohpData];
+            })
+            .catch(function(){
+                console.log("User not logged in.");
+            });
+
+
+        // get current week for the user
+        $scope.continueProgram = function(){
+            $location.path('/program');
         };
     }])
 
     .controller('programController',['$scope','LiftFactory','$rootScope','WeekFactory','$q',
     function($scope,LiftFactory, $rootScope, WeekFactory,$q){
 
-        // flag to check if new user
-        var newUser = false;
         // flag to check if its bench or overhead press week
         var benchWeek = true;
         // week object retrieved from db
@@ -165,19 +190,16 @@ angular.module('myApp')
                     $scope.intensityDay.deadlift.difficulty = week.intensityDay.deadlift.difficulty;
 
                 })
-                // no user data found, generate the data
                 .catch(function(){
-                    console.log("ALERT NEW USER no data saved!!!!");
-                    newUser = true;
-                    createData();
+                    console.log("Unable to retrieve data from database.");
                 })
         }
 
-        // If logged in get the displayed week from database
-        if($rootScope.authenticated){
+        // If logged in and not a new user get the displayed week from database
+        if($rootScope.authenticated && !$rootScope.new_user){
             reloadData();
         }
-        // If not logged in, generate data based on user input
+        // If not logged in or new user(no data saved in db), generate data based on user input
         else{
             createData();
         }
@@ -266,7 +288,7 @@ angular.module('myApp')
                 };
 
                 // calculate week 1 numbers
-                if(newUser){
+                if($rootScope.new_user){
                     weekObj.volumeDay.benchPress.weight = Math.round(userData.bench * 0.9 *10)/10;
                     weekObj.volumeDay.overheadPress.weight = Math.round(userData.ohp * 0.9 *10)/10;
                     weekObj.lightDay.benchPress.weight = Math.round(userData.bench * 0.72 *10)/10;
@@ -278,7 +300,7 @@ angular.module('myApp')
                         .then(function(){
                             $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
                             $scope.saved = true;
-                            newUser = false;
+                            $rootScope.new_user = false;
                             deferred.resolve();
                             reloadData();
                         })
@@ -391,8 +413,8 @@ angular.module('myApp')
     }])
 
     .controller('loginController',
-    ['$scope', '$location', 'AuthFactory','$rootScope',
-    function ($scope, $location, AuthFactory, $rootScope) {
+    ['$scope', '$location', 'AuthFactory','$rootScope','WeekFactory',
+    function ($scope, $location, AuthFactory, $rootScope, WeekFactory) {
 
         console.log("User Status: "+ AuthFactory.getUserStatus());
         $scope.authenticated = AuthFactory.isLoggedIn();
@@ -407,12 +429,20 @@ angular.module('myApp')
             // call login from service
             AuthFactory.login($scope.loginForm.username, $scope.loginForm.password)
                 // handle success
-                .then(function () {
+                .then(function (){
                     $location.path('/');
                     $scope.disabled = false;
                     $scope.loginForm = {};
                     $rootScope.authenticated = AuthFactory.isLoggedIn();
                     $rootScope.current_user = AuthFactory.getUserName();
+                    WeekFactory.getWeekInfo(1)
+                        .then(function(){
+                            $rootScope.new_user = false;
+                        })
+                        .catch(function(){
+                            $rootScope.new_user = true;
+                            console.log("We got a new user here.")
+                        });
                 })
                 // handle error
                 .catch(function (err) {
@@ -437,6 +467,9 @@ angular.module('myApp')
                     $location.path('/login');
                     $rootScope.authenticated = AuthFactory.isLoggedIn();
                     $rootScope.current_user = "";
+                    $rootScope.display_week = 1;
+                    $rootScope.current_week = 1;
+                    $rootScope.new_user = true;
                 });
         };
     }])

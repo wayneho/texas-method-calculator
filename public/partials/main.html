@@ -1,4 +1,4 @@
-<form class="form-horizontal">
+<form class="form-horizontal" ng-show="new_user">
     <div class="form-group">
         <label for="squatInput" class="col-sm-3 control-label">Squat</label>
         <div class="col-sm-7">
@@ -23,7 +23,17 @@
             <input required type="text"  class="form-control text-center" id="ohpInput" ng-model="ohp"/>
         </div>
     </div>
-    <div class="btn-group col-sm-6 col-sm-offset-3">
-        <button class="btn btn-primary" ng-click="updateData()">Generate Template</button>
-    </div>
 </form>
+<div class="col-sm-6 col-sm-offset-3">
+    <button class="btn btn-primary" ng-click="updateData()" ng-show="new_user">Generate Template</button>
+</div>
+
+
+<div ng-hide="new_user" col-sm-12>
+    <canvas  id="line" class="chart chart-line" chart-data="data"
+            chart-labels="labels" chart-legend="true"
+            chart-series="series" chart-colours="colours" >
+    </canvas>
+    <button class="btn btn-primary pull-right" ng-click="continueProgram()" >Continue to current week</button>
+</div>
+
