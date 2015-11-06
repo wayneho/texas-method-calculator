@@ -310,23 +310,27 @@ angular.module('myApp')
                         });
 
                 }else{
-                    weekObj.volumeDay.benchPress.weight = weekFromDB.volumeDay.benchPress.weight;
-                    weekObj.volumeDay.overheadPress.weight = weekFromDB.volumeDay.overheadPress.weight;
-                    weekObj.lightDay.benchPress.weight = weekFromDB.lightDay.benchPress.weight;
-                    weekObj.lightDay.overheadPress.weight = weekFromDB.lightDay.overheadPress.weight;
-                    weekObj.intensityDay.benchPress.weight = weekFromDB.intensityDay.benchPress.weight;
-                    weekObj.intensityDay.overheadPress.weight = weekFromDB.intensityDay.overheadPress.weight;
+                    if($scope.saved){
+                        $scope.alerts[0] = {type: 'info', msg: 'Data unchanged. Save is not needed.'};
+                    }else{
+                        weekObj.volumeDay.benchPress.weight = weekFromDB.volumeDay.benchPress.weight;
+                        weekObj.volumeDay.overheadPress.weight = weekFromDB.volumeDay.overheadPress.weight;
+                        weekObj.lightDay.benchPress.weight = weekFromDB.lightDay.benchPress.weight;
+                        weekObj.lightDay.overheadPress.weight = weekFromDB.lightDay.overheadPress.weight;
+                        weekObj.intensityDay.benchPress.weight = weekFromDB.intensityDay.benchPress.weight;
+                        weekObj.intensityDay.overheadPress.weight = weekFromDB.intensityDay.overheadPress.weight;
 
-                    WeekFactory.updateWeekInfo($rootScope.display_week, weekObj)
-                        .then(function(){
-                            $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
-                            $scope.saved = true;
-                            deferred.resolve();
-                        })
-                        .catch(function(){
-                            $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
-                            deferred.reject();
-                        });
+                        WeekFactory.updateWeekInfo($rootScope.display_week, weekObj)
+                            .then(function(){
+                                $scope.alerts[0] = {type: 'success', msg: 'Your progress has been saved.'};
+                                $scope.saved = true;
+                                deferred.resolve();
+                            })
+                            .catch(function(){
+                                $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};
+                                deferred.reject();
+                            });
+                    }
                 }
             }
             return deferred.promise;
