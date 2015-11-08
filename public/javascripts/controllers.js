@@ -12,8 +12,8 @@ angular.module('myApp')
     })
 
     .controller('mainController',
-    ['$scope','$location','LiftFactory','WeekFactory','$rootScope',
-    function($scope,$location,LiftFactory,WeekFactory,$rootScope){
+    ['$scope','$location','LiftFactory','WeekFactory','$rootScope','$q',
+    function($scope,$location,LiftFactory,WeekFactory,$rootScope,$q){
         $scope.squat = 315;
         $scope.bench = 225;
         $scope.deadlift = 395;
@@ -36,17 +36,28 @@ angular.module('myApp')
                     dData = [],
                     ohpData = [];
 
-                for(var i = 1; i < user_curr_week+1; i++){
-                    weeks.push("Week "+ i);
-                    WeekFactory.getWeekInfo(i)
-                        .then(function(weekObj){
-                            sqData.push(weekObj.intensityDay.squat.weight);
-                            bData.push(weekObj.intensityDay.benchPress.weight);
-                            dData.push(weekObj.intensityDay.deadlift.weight);
-                            ohpData.push(weekObj.intensityDay.overheadPress.weight);
-                        });
+                var promise = $q.all(null);
+
+                for(var i = 1; i < user_curr_week+1; i++) {
+                    weeks.push(i);
                 }
-                $scope.labels = weeks;
+
+                // make synchronous call to api to get weeks in order
+                weeks.forEach(function(week){
+                    promise = promise.then(function(){
+                        return WeekFactory.getWeekInfo(week)
+                            .then(function(weekObj){
+                                sqData.push(weekObj.intensityDay.squat.weight);
+                                bData.push(weekObj.intensityDay.benchPress.weight);
+                                dData.push(weekObj.intensityDay.deadlift.weight);
+                                ohpData.push(weekObj.intensityDay.overheadPress.weight);
+                            });
+                    });
+                });
+
+                $scope.labels = weeks.map(function(num){
+                    return "Week "+num;
+                });
                 $scope.series = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
                 $scope.colours = ['#3366FF', '#ff0027', '#008B2E', '#131214'];
                 $scope.data = [sqData, bData, dData, ohpData];
