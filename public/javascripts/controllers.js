@@ -358,7 +358,7 @@ angular.module('myApp')
             } else {
                 // create a new week in the database and display it
                 WeekFactory.createWeek($rootScope.current_week)
-                    .then(function () {
+                    .then(function (diagnosis) {
                         // update the user's current week
                         WeekFactory.updateCurrentWeekNum($rootScope.current_week).then(function () {
                             console.log("Created and updated user to week: " + ($rootScope.current_week + 1));
@@ -367,8 +367,14 @@ angular.module('myApp')
                             $scope.saved = true;
                             reloadData();
                         });
+                        // Display message for each lift
+                        $scope.alerts[0] = {type: 'info', msg: 'Squats: '+ diagnosis};
 
-                    })
+                    });
+                WeekFactory.getDiagnosis($rootScope.current_week-1)
+                    .then(function(diagnosis){
+                        $scope.alerts[1] = {type: 'info', msg: (benchWeek?"Overhead Press: ":"Bench Press: ")+ diagnosis};
+                    });
             }
         }
 
@@ -388,7 +394,6 @@ angular.module('myApp')
                     $scope.save()
                         .then(function(){
                             displayNextWeek();
-                            $scope.closeAlert();
                         })
                         .catch(function(){
                             $scope.alerts[0] = {type: 'danger', msg: 'Error saving week.'};

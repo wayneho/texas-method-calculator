@@ -283,6 +283,19 @@ angular.module('myApp')
             }
         }
 
+        function getDiagnosis(weekNum){
+            var bench_week = weekNum%2;
+            return getWeekInfo(weekNum)
+                .then(function(weekObj){
+                    var b_factor = getWeight(weekObj.volumeDay.benchPress.difficulty, weekObj.intensityDay.benchPress.difficulty);
+                    var ohp_factor = getWeight(weekObj.volumeDay.overheadPress.difficulty, weekObj.intensityDay.overheadPress.difficulty);
+                    return [bench_week?b_factor.diagnosis:ohp_factor.diagnosis];
+                })
+                .catch(function(){
+                    console.log("Failed to retrieve week " + weekNum);
+                });
+        }
+
         function createWeek(weekNum){
             // Alternate between bench and ohp each week
             var bench_week = weekNum%2;
@@ -337,12 +350,13 @@ angular.module('myApp')
                             difficulty: "-"
                         }
                     };
+                    var diagnosis = [sq_factor.diagnosis];
                     var deferred = $q.defer();
 
                     $http.post('/users/'+$rootScope.current_user,
                         {weekNumber: weekNum+1, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay}).then(
                         function success(){
-                            deferred.resolve();
+                            deferred.resolve(diagnosis);
                         },
                         function error(){
                             deferred.reject();
@@ -374,6 +388,7 @@ angular.module('myApp')
             updateCurrentWeekNum: updateCurrentWeekNum,
             getWeekInfo: getWeekInfo,
             updateWeekInfo: updateWeekInfo,
+            getDiagnosis: getDiagnosis,
             createWeek: createWeek,
             saveWeekOne: saveWeekOne
         }
