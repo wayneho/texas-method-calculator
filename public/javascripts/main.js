@@ -30,11 +30,6 @@ myApp.config(function($routeProvider){
             controller: 'programController',
             access: {restricted: false}
         })
-        .when('users',{
-            templateUrl: '../partials/program.html',
-            controller: 'usersController',
-            access: {restricted: true}
-        })
         .otherwise({redirectTo: '/'});
     })
     //check if a user is logged in on each and every change of route

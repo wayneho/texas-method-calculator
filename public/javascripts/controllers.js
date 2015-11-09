@@ -38,6 +38,7 @@ angular.module('myApp')
 
                 var promise = $q.all(null);
 
+                // construct an array consisting of each week numbers
                 for(var i = 1; i < user_curr_week+1; i++) {
                     weeks.push(i);
                 }
@@ -55,12 +56,15 @@ angular.module('myApp')
                     });
                 });
 
-                $scope.labels = weeks.map(function(num){
-                    return "Week "+num;
+                // create chart once all data has been retrieved
+                promise.then(function(){
+                    $scope.labels = weeks.map(function(num){
+                        return "Week "+num;
+                    });
+                    $scope.series = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
+                    $scope.colours = ['#3366FF', '#ff0027', '#008B2E', '#131214'];
+                    $scope.data = [sqData, bData, dData, ohpData];
                 });
-                $scope.series = ['Squat', 'Bench Press', 'Deadlift', 'Overhead Press'];
-                $scope.colours = ['#3366FF', '#ff0027', '#008B2E', '#131214'];
-                $scope.data = [sqData, bData, dData, ohpData];
             })
             .catch(function(){
                 console.log("User not logged in.");

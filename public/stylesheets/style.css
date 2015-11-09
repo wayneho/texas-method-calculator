@@ -7,3 +7,71 @@ a {
   color: #00B7FF;
 }
 
+footer {
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  background-color: deepskyblue;
+}
+footer span{
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  color: ghostwhite;
+  font-weight: 600;
+}
+
+.header-bar {
+  background-color: deepskyblue !important;
+}
+.header-bar p>a,
+.user-name{
+  color: #CCFFCC !important;
+  font-weight: 600;
+}
+.header-bar p{
+  color: ghostwhite !important;
+}
+.navbar-brand {
+  font-size: 28px !important;
+  color: #CCFFCC !important;
+  font-weight: 600;
+}
+
+form{
+  margin-top: 100px;
+}
+form>h1{
+  margin-bottom: 30px;
+}
+.input-form,
+.input-form>h1,
+.progress-chart>h1{
+  color: #003399;
+  font-weight: bold;
+  text-align: center;
+}
+.login-form,
+.program-wrapper>h2,
+.program-wrapper th{
+  color: #003399;
+  font-weight: bold;
+  font-size: 18px;
+}
+.input-form input {
+  font-weight: bold;
+}
+
+.program-wrapper td{
+  font-weight: bold;
+}
+
+.program-wrapper .table-header{
+  background-color: #CCFFCC !important;
+}
+
+

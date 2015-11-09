@@ -1,4 +1,5 @@
-<form class="form-horizontal" ng-show="new_user">
+<form class="form-horizontal input-form" ng-show="new_user">
+    <h1>5 Rep Max</h1>
     <div class="form-group">
         <label for="squatInput" class="col-sm-3 control-label">Squat</label>
         <div class="col-sm-7">
@@ -24,12 +25,13 @@
         </div>
     </div>
 </form>
-<div class="col-sm-6 col-sm-offset-3">
+<div class="col-sm-8 col-sm-offset-2">
     <button class="btn btn-primary pull-right" ng-click="updateData()" ng-show="new_user">Create Program</button>
 </div>
 
 
-<div ng-hide="new_user" col-sm-12>
+<div ng-hide="new_user" class="col-sm-12 progress-chart">
+    <h1>Weekly Progress</h1>
     <canvas  id="line" class="chart chart-line" chart-data="data"
             chart-labels="labels" chart-legend="true"
             chart-series="series" chart-colours="colours" >

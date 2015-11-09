@@ -7,21 +7,24 @@
     <title><%= title %></title>
   </head>
   <body>
-    <div id="main" class="container">
-      <nav class="navbar-fluid navbar-default navbar-fixed-top">
+    <header>
+      <nav class="navbar-fluid navbar-default navbar-fixed-top header-bar">
         <div class="container">
           <a class="navbar-brand" href="#/"> <%= title %> </a>
-          <p class="navbar-text"> New user? {{new_user}}</p>
           <p class="navbar-right navbar-text" ng-hide="authenticated"><a href="#/login">Login</a> or <a href="#/register">Register</a></p>
-          <p class="navbar-right navbar-text" ng-show="authenticated" ng-controller="logoutController"><a href="#/" ng-click="logout()">Logout</a></p>
-          <p class="navbar-right navbar-text" ng-show="authenticated" >Signed in as {{current_user}}</p>
+          <p class="navbar-right navbar-text user-name" ng-show="authenticated" ng-controller="logoutController">
+            <span class="glyphicon glyphicon-user"></span> {{current_user}}
+            <a href="#/" ng-click="logout()">Logout</a>
+          </p>
         </div>
       </nav>
-      <div class="col-md-8 col-md-offset-2">
-        <div ng-view>
-        </div>
+    </header>
+    <main>
+      <div id="main" class="container-wrapper">
+        <div class="col-md-8 col-md-offset-2" ng-view></div>
       </div>
-    </div>
+    </main>
+    <footer class="container-fluid" ng-class="appliedClass()"><span>&copy; 2015 Wayne Ho</span></footer>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.7/angular-route.js"></script>
