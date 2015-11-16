@@ -15,7 +15,7 @@ footer {
   width: 100%;
   height: 50px;
   line-height: 50px;
-  background-color: deepskyblue;
+  background-color: #1963bf;
 }
 footer span{
   display: inline-block;
@@ -26,11 +26,11 @@ footer span{
 }
 
 .header-bar {
-  background-color: deepskyblue !important;
+  background-color: #1963bf !important;
 }
 .header-bar p>a,
 .user-name{
-  color: #CCFFCC !important;
+  color: ghostwhite !important;
   font-weight: 600;
 }
 .header-bar p{
@@ -38,7 +38,7 @@ footer span{
 }
 .navbar-brand {
   font-size: 28px !important;
-  color: #CCFFCC !important;
+  color: ghostwhite !important;
   font-weight: 600;
 }
 
@@ -69,9 +69,21 @@ form>h1{
 .program-wrapper td{
   font-weight: bold;
 }
+.program-wrapper table{
+  border: 1px solid gainsboro;
+  -webkit-box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.3);
+  box-shadow: 1px 1px 2px 0px rgba(0,0,0,0.3);
+}
 
-.program-wrapper .table-header{
-  background-color: #CCFFCC !important;
+.glyphicon-arrow-up{
+  color: limegreen;
+}
+.glyphicon-arrow-down{
+  color: red;
+}
+.glyphicon-minus{
+  color: #00d6b2;
 }
 
 

@@ -94,12 +94,14 @@ angular.module('myApp')
                 name: "Squat",
                 reps: "5x5",
                 weight: "",
+                symbol: "",
                 difficulty: "-"
             },
             press: {
                 name: "Bench Press",
                 reps: "5x5",
                 weight: "",
+                symbol: "",
                 difficulty: "-"
             },
             acc: {
@@ -132,12 +134,14 @@ angular.module('myApp')
                 name: "Squat",
                 reps: "1x5",
                 weight: "",
+                symbol: "",
                 difficulty: "-"
             },
             press: {
                 name: "Bench Press",
                 reps: "1x5",
                 weight: "",
+                symbol: "",
                 difficulty: "-"
             },
             deadlift: {
@@ -372,12 +376,43 @@ angular.module('myApp')
                             reloadData();
                         });
                         // Display message for each lift
-                        $scope.alerts[0] = {type: 'info', msg: 'Squats: '+ diagnosis};
+                        $scope.alerts[0] = {type: 'info', msg: 'Squats: '+ diagnosis.msg};
+                        // Display proper symbol for squats depending on increase from last week
+                        if(diagnosis.volFactor > 0){
+                            $scope.volumeDay.squat.symbol = "glyphicon glyphicon-arrow-up";
+                        }else if(diagnosis.volFactor < 0){
+                            $scope.volumeDay.squat.symbol = "glyphicon glyphicon-arrow-down";
+                        }else{
+                            $scope.volumeDay.squat.symbol = "glyphicon glyphicon-minus";
+                        }
+                        if(diagnosis.intFactor > 0){
+                            $scope.intensityDay.squat.symbol = "glyphicon glyphicon-arrow-up";
+                        }else if(diagnosis.volFactor < 0){
+                            $scope.intensityDay.squat.symbol = "glyphicon glyphicon-arrow-down";
+                        }else{
+                            $scope.intensityDay.squat.symbol = "glyphicon glyphicon-minus";
+                        }
 
                     });
                 WeekFactory.getDiagnosis($rootScope.current_week-1)
                     .then(function(diagnosis){
-                        $scope.alerts[1] = {type: 'info', msg: (benchWeek?"Overhead Press: ":"Bench Press: ")+ diagnosis};
+                        $scope.alerts[1] = {type: 'info', msg: (benchWeek?"Overhead Press: ":"Bench Press: ")+ diagnosis.msg};
+                        // Display proper symbol for the press movement depending on increase from last week
+                        if(diagnosis.volFactor > 0){
+                            $scope.volumeDay.press.symbol = "glyphicon glyphicon-arrow-up";
+                        }else if(diagnosis.volFactor < 0){
+                            $scope.volumeDay.press.symbol = "glyphicon glyphicon-arrow-down";
+                        }else{
+                            $scope.volumeDay.press.symbol = "glyphicon glyphicon-minus";
+                        }
+                        if(diagnosis.intFactor > 0){
+                            $scope.intensityDay.press.symbol = "glyphicon glyphicon-arrow-up";
+                        }else if(diagnosis.volFactor < 0){
+                            $scope.intensityDay.press.symbol = "glyphicon glyphicon-arrow-down";
+                        }else{
+                            $scope.intensityDay.press.symbol = "glyphicon glyphicon-minus";
+                        }
+
                     });
             }
         }
@@ -413,11 +448,19 @@ angular.module('myApp')
                 if($scope.saved){
                     $rootScope.display_week-=1;
                     reloadData();
+                    $scope.volumeDay.squat.symbol = "";
+                    $scope.intensityDay.squat.symbol = "";
+                    $scope.volumeDay.press.symbol = "";
+                    $scope.intensityDay.press.symbol = "";
                 }else{
                     $scope.save()
                         .then(function(){
                             $rootScope.display_week-=1;
                             reloadData();
+                            $scope.volumeDay.squat.symbol = "";
+                            $scope.intensityDay.squat.symbol = "";
+                            $scope.volumeDay.press.symbol = "";
+                            $scope.intensityDay.press.symbol = "";
                             $scope.closeAlert();
                         })
                         .catch(function(){

@@ -15,7 +15,7 @@
         <tr ng-repeat="exercise in day.workout" >
             <td>{{exercise.name}}</td>
             <td>{{exercise.reps}}</td>
-            <td>{{exercise.weight}}</td>
+            <td>{{exercise.weight}} <span ng-class="exercise.symbol"></span></td>
             <td uib-dropdown ng-show="exercise.difficulty">
                 <button class="btn btn-sm" ng-class="appliedClass(exercise.difficulty)" uib-dropdown-toggle>
                     {{exercise.difficulty}} <span class="caret"></span>

@@ -283,19 +283,31 @@ angular.module('myApp')
             }
         }
 
+
+
+        // function to retrieve bench or ohp diagnosis
+        // necessary because bench and ohp alternate each week
         function getDiagnosis(weekNum){
             var bench_week = weekNum%2;
             return getWeekInfo(weekNum)
                 .then(function(weekObj){
                     var b_factor = getWeight(weekObj.volumeDay.benchPress.difficulty, weekObj.intensityDay.benchPress.difficulty);
                     var ohp_factor = getWeight(weekObj.volumeDay.overheadPress.difficulty, weekObj.intensityDay.overheadPress.difficulty);
-                    return [bench_week?b_factor.diagnosis:ohp_factor.diagnosis];
+                    var volFactor = bench_week?b_factor.volumeFactor:ohp_factor.volumeFactor;
+
+                    var diagnosis = {
+                        msg: bench_week?b_factor.diagnosis:ohp_factor.diagnosis,
+                        volFactor: bench_week?b_factor.volumeFactor:ohp_factor.volumeFactor,
+                        intFactor: bench_week?b_factor.intensityFactor:ohp_factor.intensityFactor
+                    };
+                    return diagnosis;
                 })
                 .catch(function(){
                     console.log("Failed to retrieve week " + weekNum);
                 });
         }
 
+        // create next week's numbers depending on last week's difficulty
         function createWeek(weekNum){
             // Alternate between bench and ohp each week
             var bench_week = weekNum%2;
@@ -350,9 +362,14 @@ angular.module('myApp')
                             difficulty: "-"
                         }
                     };
-                    var diagnosis = [sq_factor.diagnosis];
+                    var diagnosis = {
+                        msg: sq_factor.diagnosis,
+                        volFactor: sq_factor.volumeFactor,
+                        intFactor: sq_factor.intensityFactor
+                    };
                     var deferred = $q.defer();
 
+                    //save user data;
                     $http.post('/users/'+$rootScope.current_user,
                         {weekNumber: weekNum+1, volumeDay: volumeDay, lightDay: lightDay, intensityDay: intensityDay}).then(
                         function success(){
