@@ -1,5 +1,4 @@
-<div class="program-wrapper">
-    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" ng-click="closeAlert($index)">{{alert.msg}}</uib-alert>
+<div class="col-sm-6 col-sm-offset-3 program-wrapper">
     <h2>Week {{display_week}}</h2>
     <table class="table table-striped table-condensed" ng-repeat="day in program">
         <caption>{{day.name}}</caption>
@@ -38,7 +37,9 @@
         <button class="btn btn-primary" ng-click="nextWeek()">Next week</button>
     </div>
 </div>
-
+<div class="col-sm-3 alert-box">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" ng-click="closeAlert($index)">{{alert.msg}}</uib-alert>
+</div>
 
 
 

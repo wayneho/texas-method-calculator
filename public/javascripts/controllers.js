@@ -76,7 +76,6 @@ angular.module('myApp')
             $location.path('/program');
         };
     }])
-
     .controller('programController',['$scope','LiftFactory','$rootScope','WeekFactory','$q',
     function($scope,LiftFactory, $rootScope, WeekFactory,$q){
 
@@ -330,7 +329,8 @@ angular.module('myApp')
 
                 }else{
                     if($scope.saved){
-                        $scope.alerts[0] = {type: 'info', msg: 'Data unchanged. Save is not needed.'};
+                        // Dont need to save data as nothing has changed
+                        $scope.alerts[0] = {type: 'info', msg: 'Saved.'};
                     }else{
                         weekObj.volumeDay.benchPress.weight = weekFromDB.volumeDay.benchPress.weight;
                         weekObj.volumeDay.overheadPress.weight = weekFromDB.volumeDay.overheadPress.weight;
@@ -439,7 +439,7 @@ angular.module('myApp')
                         });
                 }
             }else{
-                $scope.alerts[0] = {type: 'danger', msg: 'Week not yet completed.'};
+                $scope.alerts[0] = {type: 'danger', msg: 'Incomplete week.'};
             }
         };
         // display previous week
