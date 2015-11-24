@@ -1,13 +1,21 @@
-<div class="col-sm-6 col-sm-offset-3 program-wrapper">
+<div class="col-md-3 col-md-push-9  alert-box">
+    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" ng-click="closeAlert($index)">{{alert.msg}}</uib-alert>
+</div>
+<div class="col-md-6 program-wrapper">
     <h2>Week {{display_week}}</h2>
+    <div class="btn-group pull-right">
+        <button class="btn btn-primary" ng-show="display_week > 1" ng-click="previousWeek()">Previous week</button>
+        <button class="btn btn-primary" ng-click="save()">Save</button>
+        <button class="btn btn-primary" ng-click="nextWeek()">Next week</button>
+    </div>
     <table class="table table-striped table-condensed" ng-repeat="day in program">
         <caption>{{day.name}}</caption>
         <thead>
         <tr class="table-header">
-            <th class="col-sm-3">Exercise</th>
-            <th class="col-sm-3">Reps</th>
-            <th class="col-sm-3">Weight(lbs)</th>
-            <th class="col-sm-3">Difficulty</th>
+            <th class="col-md-3">Exercise</th>
+            <th class="col-md-3">Reps</th>
+            <th class="col-md-3">Weight(lbs)</th>
+            <th class="col-md-3">Difficulty</th>
         </tr>
         </thead>
         <tbody>
@@ -31,15 +39,8 @@
         </tbody>
     </table>
 
-    <div class="btn-group pull-right">
-        <button class="btn btn-primary" ng-show="display_week > 1" ng-click="previousWeek()">Previous week</button>
-        <button class="btn btn-primary" ng-click="save()">Save</button>
-        <button class="btn btn-primary" ng-click="nextWeek()">Next week</button>
-    </div>
 </div>
-<div class="col-sm-3 alert-box">
-    <uib-alert ng-repeat="alert in alerts" type="{{alert.type}}" ng-click="closeAlert($index)">{{alert.msg}}</uib-alert>
-</div>
+
 
 
 

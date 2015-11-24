@@ -42,8 +42,13 @@ passport.use(new LocalStrategy(Account.authenticate()));
 passport.serializeUser(Account.serializeUser());
 passport.deserializeUser(Account.deserializeUser());
 
-// mongoose
-mongoose.connect('mongodb://localhost/texas-test');
+if(process.env.DEV_ENV){
+  // mongoose
+  mongoose.connect('mongodb://localhost/texas-test');
+}else{
+  mongoose.connect('mongodb://MongoLab-9y:D0fRbTorQNIy5USGh7fcgW4K6MjYdpJLS_VDwQmuuuE-@ds042128.mongolab.com:42128/MongoLab-9y');
+}
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
