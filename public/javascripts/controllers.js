@@ -14,10 +14,10 @@ angular.module('myApp')
     .controller('mainController',
     ['$scope','$location','LiftFactory','WeekFactory','$rootScope','$q',
     function($scope,$location,LiftFactory,WeekFactory,$rootScope,$q){
-        $scope.squat = 315;
-        $scope.bench = 225;
-        $scope.deadlift = 395;
-        $scope.ohp = 135;
+        $scope.squat = "";
+        $scope.bench = "";
+        $scope.deadlift = "";
+        $scope.ohp = "";
 
         // create first week for users with no data based on user input
         $scope.updateData = function(){
