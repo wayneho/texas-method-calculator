@@ -1,34 +1,32 @@
 <div class="col-sm-8 col-sm-offset-2">
-    <form class="form-horizontal input-form" ng-show="new_user">
+    <form class="form-horizontal input-form" ng-show="new_user" ng-submit="updateData()">
         <h1>5 Rep Max(lbs)</h1>
         <div class="form-group">
             <label for="squatInput" class="col-sm-3 control-label">Squat</label>
             <div class="col-sm-7">
-                <input required type="text" class="form-control text-center" id="squatInput" ng-model="squat"/>
+                <input required type="text" class="form-control text-center" id="squatInput" ng-model="squat">
             </div>
         </div>
         <div class="form-group">
             <label for="benchInput" class="col-sm-3 control-label">Bench Press</label>
             <div class="col-sm-7">
-                <input required type="text" class="form-control text-center" id="benchInput" ng-model="bench"/>
+                <input required type="text" class="form-control text-center" id="benchInput" ng-model="bench">
             </div>
         </div>
         <div class="form-group">
             <label for="deadliftInput" class="col-sm-3 control-label">Deadlift</label>
             <div class="col-sm-7">
-                <input required type="text" class="form-control text-center" id="deadliftInput" ng-model="deadlift"/>
+                <input required type="text" class="form-control text-center" id="deadliftInput" ng-model="deadlift">
             </div>
         </div>
         <div class="form-group">
             <label for="ohpInput" class="col-sm-3 control-label">Overhead Press</label>
             <div class="col-sm-7">
-                <input required type="text"  class="form-control text-center" id="ohpInput" ng-model="ohp"/>
+                <input required type="text"  class="form-control text-center" id="ohpInput" ng-model="ohp">
             </div>
         </div>
+        <button type="submit" class="btn btn-primary pull-right" ng-show="new_user">Create Program</button>
     </form>
-    <div class="col-sm-8 col-sm-offset-2">
-        <button class="btn btn-primary pull-right" ng-click="updateData()" ng-show="new_user">Create Program</button>
-    </div>
 
 
     <div ng-hide="new_user" class="col-sm-12 progress-chart">
