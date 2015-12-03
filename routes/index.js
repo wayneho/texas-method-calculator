@@ -35,7 +35,6 @@ router.get('/logout', function(req, res) {
   res.status(200).json({status: 'Bye!'})
 });
 
-
 function isAuthenticated (req, res, next) {
   // if user is authenticated in the session, call the next() to call the next request handler
   // Passport adds this method to request object. A middleware is allowed to add properties to
@@ -48,10 +47,12 @@ function isAuthenticated (req, res, next) {
   if (req.isAuthenticated()){
     return next();
   }
-
+  console.log("unauthorized access");
   // if the user is not authenticated then redirect him to the login page
   return res.redirect('/#/login');
 }
-//router.use('/', isAuthenticated);
+
+router.use('/', isAuthenticated);
+
 
 module.exports = router;
