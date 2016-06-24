@@ -46,7 +46,7 @@ if(process.env.DEV_ENV){
   // mongoose
   mongoose.connect('mongodb://localhost/texas-test');
 }else{
-  mongoose.connect('mongodb://MongoLab-9y:D0fRbTorQNIy5USGh7fcgW4K6MjYdpJLS_VDwQmuuuE-@ds042128.mongolab.com:42128/MongoLab-9y');
+  mongoose.connect('mongodb://wayne0:123321@ds054298.mlab.com:54298/texas-method');
 }
 
 
